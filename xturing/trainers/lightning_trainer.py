@@ -30,7 +30,7 @@ class TuringLightningModule(pl.LightningModule):
     ):
         super().__init__()
         self.model_engine = model_engine
-        self.pytorch_model = self.model_engine.model
+        self.pytorch_model = self.model_engine.mm_projector#.model
         self.train_dataset = train_dataset
         self.preprocessor = preprocessor
 

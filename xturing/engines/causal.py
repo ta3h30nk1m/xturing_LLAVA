@@ -78,18 +78,17 @@ class CausalEngine(BaseEngine):
         self.loss_fct = CrossEntropyLoss()
         self.load_8bit = load_8bit
 
-        self.visual_model = #CLIP encoder
-        self.mm_projector = torch.nn.Linear(4096, 256)
-
     def training_step(self, batch):
         if self.load_8bit:
             with torch.autocast("cuda", dtype=torch.float16):
                 outputs = self.model(
+                    images = batch["images"],
                     input_ids=batch["input_ids"],
                     attention_mask=batch.get("attention_mask", None),
                 )
         else:
             outputs = self.model(
+                images = batch["images"],
                 input_ids=batch["input_ids"],
                 attention_mask=batch.get("attention_mask", None),
             )
@@ -106,6 +105,7 @@ class CausalEngine(BaseEngine):
     def validation_step(self, batch):
         metrics = evaluate.load("accuracy")
         outputs = self.model(
+            images = batch["images"],
             input_ids=batch["input_ids"],
             attention_mask=batch.get("attention_mask", None),
         )

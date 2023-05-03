@@ -930,12 +930,17 @@ class LlamaModel(LlamaPreTrainedModel):
             attentions=all_self_attns,
         )
 
+from transformers import CLIPVisionModel
 
 class LlamaForCausalLM(LlamaPreTrainedModel):
     _keys_to_ignore_on_load_missing = [r"lm_head.weight"]
 
     def __init__(self, config):
         super().__init__(config)
+
+        self.visual_model = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")
+        self.mm_projector = torch.nn.Linear(1024, 4096)
+
         self.model = LlamaModel(config)
 
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
@@ -963,6 +968,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
 
     def forward(
         self,
+        images: torch.Tensor = None,
         input_ids: torch.LongTensor = None,
         attention_mask: Optional[torch.Tensor] = None,
         past_key_values: Optional[List[torch.FloatTensor]] = None,
@@ -1055,9 +1061,80 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             return_dict if return_dict is not None else self.config.use_return_dict
         )
 
+        if inputs_embeds is None:
+            inputs_embeds = self.embed_tokens(input_ids)
+
+        vision_tower = getattr(self, 'visual_model', None)
+        orig_embeds_params = getattr(self, 'orig_embeds_params', None)
+        if vision_tower is not None and (input_ids.shape[1] != 1) and images is not None:
+            # TODO: this is a modified multimodal LLM -- Haotian Liu
+            vision_tower = vision_tower[0]  # HACK: for FSDP
+            with torch.no_grad():
+                if type(images) is list:
+                    # variable length images
+                    image_features = []
+                    for image in images:
+                        image_forward_out = vision_tower(image.unsqueeze(0), output_hidden_states=True)
+                        select_hidden_state_layer = -2#getattr(self.config, "mm_vision_select_layer", -1)
+                        select_hidden_state = image_forward_out.hidden_states[select_hidden_state_layer]
+                        image_feature = select_hidden_state[:, 1:]
+                        image_features.append(image_feature)
+                else:
+                    image_forward_outs = vision_tower(images, output_hidden_states=True)
+                    select_hidden_state_layer = -2#getattr(self.config, "mm_vision_select_layer", -1)
+                    select_hidden_state = image_forward_outs.hidden_states[select_hidden_state_layer]
+                    image_features = select_hidden_state[:, 1:]
+            if type(images) is list:
+                image_features = [self.mm_projector(image_feature)[0] for image_feature in image_features]
+            else:
+                image_features = self.mm_projector(image_features)
+            dummy_image_features = torch.zeros(256, 1024, device=inputs_embeds.device, dtype=inputs_embeds.dtype)
+            dummy_image_features = self.mm_projector(dummy_image_features)
+
+            new_input_embeds = []
+            cur_image_idx = 0
+            for cur_input_ids, cur_input_embeds in zip(input_ids, inputs_embeds):
+                if (cur_input_ids == vision_tower.config.im_patch_token).sum() == 0:
+                    # multimodal LLM, but the current sample is not multimodal
+                    cur_input_embeds = cur_input_embeds + (0. * dummy_image_features).sum()
+                    new_input_embeds.append(cur_input_embeds)
+                    continue
+                if vision_tower.config.use_im_start_end:
+                    cur_image_features = image_features[cur_image_idx]
+                    num_patches = cur_image_features.shape[0]
+                    if (cur_input_ids == vision_tower.config.im_start_token).sum() != (cur_input_ids == vision_tower.config.im_end_token).sum():
+                        raise ValueError("The number of image start tokens and image end tokens should be the same.")
+                    image_start_tokens = torch.where(cur_input_ids == vision_tower.config.im_start_token)[0]
+                    for image_start_token_pos in image_start_tokens:
+                        cur_image_features = image_features[cur_image_idx].to(device=cur_input_embeds.device)
+                        num_patches = cur_image_features.shape[0]
+                        if cur_input_ids[image_start_token_pos + num_patches + 1] != vision_tower.config.im_end_token:
+                            raise ValueError("The image end token should follow the image start token.")
+                        if orig_embeds_params is not None:
+                            cur_new_input_embeds = torch.cat((cur_input_embeds[:image_start_token_pos].detach(), cur_input_embeds[image_start_token_pos:image_start_token_pos+1], cur_image_features, cur_input_embeds[image_start_token_pos + num_patches + 1:image_start_token_pos + num_patches + 2], cur_input_embeds[image_start_token_pos + num_patches + 2:].detach()), dim=0)
+                        else:
+                            cur_new_input_embeds = torch.cat((cur_input_embeds[:image_start_token_pos+1], cur_image_features, cur_input_embeds[image_start_token_pos + num_patches + 1:]), dim=0)
+                        cur_image_idx += 1
+                    new_input_embeds.append(cur_new_input_embeds)
+                else:
+                    cur_image_features = image_features[cur_image_idx]
+                    num_patches = cur_image_features.shape[0]
+                    if (cur_input_ids == vision_tower.config.im_patch_token).sum() != num_patches:
+                        raise ValueError("The number of image patch tokens should be the same as the number of image patches.")
+                    masked_indices = torch.where(cur_input_ids == vision_tower.config.im_patch_token)[0]
+                    mask_index_start = masked_indices[0]
+                    if (masked_indices != torch.arange(mask_index_start, mask_index_start+num_patches, device=masked_indices.device, dtype=masked_indices.dtype)).any():
+                        raise ValueError("The image patch tokens should be consecutive.")
+                    if orig_embeds_params is not None:
+                        cur_new_input_embeds = torch.cat((cur_input_embeds[:mask_index_start].detach(), cur_image_features, cur_input_embeds[mask_index_start+num_patches:].detach()), dim=0)
+                    else:
+                        cur_new_input_embeds = torch.cat((cur_input_embeds[:mask_index_start], cur_image_features, cur_input_embeds[mask_index_start+num_patches:]), dim=0)
+                    new_input_embeds.append(cur_new_input_embeds)
+            inputs_embeds = torch.stack(new_input_embeds, dim=0)
+
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
         outputs = self.model(
-            input_ids=input_ids,
+            input_ids=None,
             attention_mask=attention_mask,
             past_key_values=past_key_values,
             inputs_embeds=inputs_embeds,
