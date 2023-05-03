@@ -7,6 +7,7 @@ from datasets import DatasetDict, load_from_disk
 
 from xturing.datasets.base import BaseDataset
 
+import glob, os, random, jsonlines
 
 @dataclass
 class TextDatasetMeta:
@@ -23,7 +24,14 @@ class TextDataset(BaseDataset):
             self.data = {"train": HFDataset.from_dict(path)}
         else:
             assert Path(path).exists(), "path does not exist"
-            self.data = load_from_disk(path)
+            self.data = []#load_from_disk(path)
+            laion_files = glob.glob(os.path.join(path,'*.jsonl'))
+
+            for file in laion_files:
+                with jsonlines.open(file) as f:
+                    for line in f.iter():
+                        self.data.append({'images': random.choice(line['image_info'])['raw_url'], 'text': random.choice(line['text_list'])})
+
         self._validate()
         self._meta = TextDatasetMeta()
         self._template = None

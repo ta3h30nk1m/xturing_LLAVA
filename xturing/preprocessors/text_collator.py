@@ -6,6 +6,9 @@ from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
 from xturing.datasets import TextDatasetMeta
 
+from PIL import Image
+import requests
+from torchvision import transforms
 
 class TextDataCollator:
     config_name = "text_dataset"
@@ -15,8 +18,10 @@ class TextDataCollator:
         tokenizer: PreTrainedTokenizerBase,
         max_length: Optional[int] = None,
         meta: TextDatasetMeta = TextDatasetMeta(),
+        transformer: transforms = None,
     ):
         self.tokenizer = tokenizer
+        self.transformer = transformer
         self.max_length = max_length
         self.meta = meta
 
@@ -26,6 +31,7 @@ class TextDataCollator:
         label_masks = []
 
         for sample in batches:
+            input_img = self.transformer(Image.open(requests.get(sample["images"], stream=True).raw).convert('RGB') )
             input_text = self.tokenizer(sample["text"])
             input_ids = input_text["input_ids"]
 
@@ -49,6 +55,7 @@ class TextDataCollator:
 
             flatten_samples.append(
                 {
+                    "images": input_img,
                     "input_ids": torch.tensor(input_ids).long(),
                     "attention_mask": torch.tensor(attention_mask).long(),
                 }

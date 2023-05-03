@@ -21,6 +21,8 @@ from xturing.utils.logging import configure_logger
 
 logger = configure_logger(__name__)
 
+from torchvision import transforms
+from torchvision.transforms.functional import InterpolationMode
 
 class CausalModel(BaseModel):
     def __init__(self, engine: str, weights_path: Optional[str] = None):
@@ -56,11 +58,19 @@ class CausalModel(BaseModel):
         return self.generation_args
 
     def _make_collate_fn(self, dataset: Union[TextDataset, InstructionDataset]):
+        normalize = transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
+        transform_train = transforms.Compose([                        
+                transforms.RandomResizedCrop(224,scale=(0.5, 1.0),interpolation=InterpolationMode.BICUBIC),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ])   
         return BasePreprocessor.create(
             dataset.config_name,
             self.engine.tokenizer,
             int(self.finetuning_args.max_length),
             dataset.meta,
+            transform_train
         )
 
     def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset]):

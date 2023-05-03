@@ -1,11 +1,11 @@
-from multimodal_xturing.datasets import #InstructionDataset
-from multimodal_xturing.models import BaseModel
+from xturing.datasets import TextDataset
+from xturing.models import BaseModel
 
 # Load the dataset
-instruction_dataset = #InstructionDataset("./alpaca_data")
+instruction_dataset = TextDataset("./mmc4")
 
 # Initialize the model
-model = BaseModel.create("llama_lora")
+model = BaseModel.create("llama_lora_int4")
 
 # Finetune the model
 model.finetune(dataset=instruction_dataset)
