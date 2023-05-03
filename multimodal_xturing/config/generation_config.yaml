@@ -1,0 +1,163 @@
+# For large models contrastive search works very well.
+# For smaller models top-p sampling is better. Contrastive search repeats the tokens in small models.
+
+
+# Contrastive search
+defaults:
+  max_new_tokens: 256
+
+# Contrastive search
+llama:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+llama_lora:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Greedy search
+llama_lora_int8:
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+llama_lora_int4:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+gptj:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+gptj_lora:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Greedy search
+gptj_lora_int8:
+  max_new_tokens: 256
+  do_sample: false
+
+# Top-p sampling
+gpt2:
+  do_sample: true
+  top_k: 0
+  top_p: 0.92
+  max_new_tokens: 256
+
+# Top-p sampling
+gpt2_lora:
+  do_sample: true
+  top_k: 0
+  top_p: 0.92
+  max_new_tokens: 256
+
+# Top-p sampling
+gpt2_lora_int8:
+  do_sample: true
+  top_k: 0
+  top_p: 0.92
+  max_new_tokens: 256
+
+# Top-p sampling
+distilgpt2:
+  do_sample: true
+  top_k: 0
+  top_p: 0.92
+  max_new_tokens: 256
+
+# Top-p sampling
+distilgpt2_lora:
+  do_sample: true
+  top_k: 0
+  top_p: 0.92
+  max_new_tokens: 256
+
+# Contrastive search
+galactica:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+galactica_lora:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Greedy search
+galactica_lora_int8:
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+opt:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+opt_lora:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Greedy search
+opt_lora_int8:
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+cerebras:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+cerebras_lora:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Greedy search
+cerebras_lora_int8:
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+bloom:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Contrastive search
+bloom_lora:
+  penalty_alpha: 0.6
+  top_k: 4
+  max_new_tokens: 256
+  do_sample: false
+
+# Greedy search
+bloom_lora_int8:
+  max_new_tokens: 256
+  do_sample: false
