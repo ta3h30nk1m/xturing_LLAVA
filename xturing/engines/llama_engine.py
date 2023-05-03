@@ -148,7 +148,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         layers = find_layers(model)
 
-        for name in ["lm_head"]:
+        for name in ["lm_head", "vision_model", "mm_projector"]:
             if name in layers:
                 del layers[name]
 
