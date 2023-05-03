@@ -32,7 +32,7 @@ class TextDataset(BaseDataset):
                     for line in f.iter():
                         self.data.append({'images': random.choice(line['image_info'])['raw_url'], 'text': random.choice(line['text_list'])})
 
-        self._validate()
+        #self._validate()
         self._meta = TextDatasetMeta()
         self._template = None
 
@@ -52,13 +52,13 @@ class TextDataset(BaseDataset):
             ), "The dataset should have only two columns, text and target"
 
     def __len__(self):
-        return len(self.data["train"])
+        return len(self.data)
 
     def __iter__(self):
-        return iter(self.data["train"])
+        return iter(self.data)
 
     def __getitem__(self, idx):
-        return self.data["train"][idx]
+        return self.data[idx]
 
-    def save(self, path):
-        return self.data.save_to_disk(path)
+    # def save(self, path):
+    #     return self.data.save_to_disk(path)

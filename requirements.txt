@@ -9,3 +9,7 @@ ai21
 cohere
 openai
 rouge_score
+evaluate
+sentencepiece
+wget
+deepspeed
