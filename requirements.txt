@@ -1,0 +1,11 @@
+torch
+torchvision
+transformers
+accelerate
+jsonlines
+pytorch-lightning
+datasets
+ai21
+cohere
+openai
+rouge_score
