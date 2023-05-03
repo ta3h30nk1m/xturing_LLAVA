@@ -148,11 +148,13 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         layers = find_layers(model)
         print(layers)
-
+        key_to_del = []
         for name in ["lm_head", "visual_model", "mm_projector"]:
             for key in layers.keys():
                 if name in key:
-                    del layers[key]
+                    key_to_del.append(key)
+        for key in key_to_del:
+            del layers[key]
             # if name in layers:
             #     del layers[name]
 
