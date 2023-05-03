@@ -150,8 +150,11 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         print(layers)
 
         for name in ["lm_head", "visual_model", "mm_projector"]:
-            if name in layers:
-                del layers[name]
+            for key in layers.keys():
+                if name in key:
+                    del layers[key]
+            # if name in layers:
+            #     del layers[name]
 
         wbits = 4
         groupsize = 128
