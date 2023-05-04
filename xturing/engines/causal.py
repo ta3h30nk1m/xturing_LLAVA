@@ -100,6 +100,7 @@ class CausalEngine(BaseEngine):
         else:
             loss = self.loss_fct(outputs.get("logits"), batch["targets"])
 
+        loss.requires_grad_(True)
         return loss
 
     def validation_step(self, batch):
