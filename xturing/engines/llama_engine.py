@@ -182,6 +182,11 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         model.gradient_checkpointing_enable()
         model.enable_input_require_grads()
 
+        # only training mm_projector
+        model.requires_grad_(False)
+        for p in model.mm_projector.parameters():
+            p.requires_grad = True
+
         tokenizer = LlamaTokenizer.from_pretrained(model_name, add_bos_token=False)
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.pad_token_id = tokenizer.eos_token_id

@@ -46,9 +46,8 @@ class TuringLightningModule(pl.LightningModule):
     def configure_optimizers(self):
         if self.optimizer_name == "adamw":
             optimizer = torch.optim.AdamW(
-                self.pytorch_model.mm_projector.parameters(), lr=self.learning_rate
+                self.pytorch_model.parameters(), lr=self.learning_rate
             )
-            print("done")
         elif self.optimizer_name == "adam":
             optimizer = torch.optim.adam(
                 self.pytorch_model.parameters(), lr=self.learning_rate
