@@ -36,7 +36,7 @@ class TextDataset(BaseDataset):
                         img = random.choice(line['image_info'])['raw_url']
                         text = random.choice(line['text_list'])
                         try:
-                            a = Image.open(BytesIO(requests.get(img).content)).convert('RGB')
+                            a = Image.open(BytesIO(requests.get(img, stream=True, timeout=5).content))
                             self.data.append({'images': img, 'text': text})
                         except:
                             continue
