@@ -940,6 +940,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
     _keys_to_ignore_on_load_missing = [r"lm_head.weight"]
 
     def __init__(self, config):
+        config.vocab_size=32004
         super().__init__(config)
 
         torch.set_default_dtype(torch.float)

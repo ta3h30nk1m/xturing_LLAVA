@@ -193,7 +193,6 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             "liuhaotian/LLaVA-7b-delta-v0",
             cache_dir=None,
             model_max_length=512,
-            padding_side="right",
             use_fast=False,
         )
         # tokenizer.pad_token = tokenizer.eos_token
