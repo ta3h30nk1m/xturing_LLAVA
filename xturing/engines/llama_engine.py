@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import torch
 import transformers
 from torch import nn
+from transformers import AutoTokenizer
 
 from xturing.engines.causal import CausalEngine, CausalLoraEngine
 from xturing.engines.llama_utils import LlamaConfig, LlamaForCausalLM, LlamaTokenizer
@@ -187,9 +188,16 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         for p in model.mm_projector.parameters():
             p.requires_grad = True
 
-        tokenizer = LlamaTokenizer.from_pretrained(model_name, add_bos_token=False)
-        tokenizer.pad_token = tokenizer.eos_token
-        tokenizer.pad_token_id = tokenizer.eos_token_id
+        # tokenizer = LlamaTokenizer.from_pretrained(model_name, add_bos_token=False)
+        tokenizer = AutoTokenizer.from_pretrained(
+            "liuhaotian/LLaVA-7b-delta-v0",
+            cache_dir=None,
+            model_max_length=512,
+            padding_side="right",
+            use_fast=False,
+        )
+        # tokenizer.pad_token = tokenizer.eos_token
+        # tokenizer.pad_token_id = tokenizer.eos_token_id
 
         super().__init__(
             model=model,

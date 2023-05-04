@@ -954,13 +954,13 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         # Initialize weights and apply final processing
         self.post_init()
         tokenizer = AutoTokenizer.from_pretrained(
-            "facebook/opt-125m",
+            "liuhaotian/LLaVA-7b-delta-v0",
             cache_dir=None,
             model_max_length=512,
             padding_side="right",
             use_fast=False,
         )
-        self.initialize_vision_tokenizer(True, tokenizer)
+        self.initialize_vision_tokenizer(True, tokenizer, device='cpu')
 
     def get_input_embeddings(self):
         return self.model.embed_tokens
@@ -984,25 +984,9 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                                     tune_mm_mlp_adapter=True, pretrain_mm_mlp_adapter=None):
         vision_config = self.visual_model[0].config
         vision_config.use_im_start_end = mm_use_im_start_end
-        tokenizer.add_tokens([DEFAULT_IMAGE_PATCH_TOKEN], special_tokens=True)
-        self.resize_token_embeddings(len(tokenizer))
 
         if mm_use_im_start_end:
-            num_new_tokens = tokenizer.add_tokens([DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN], special_tokens=True)
-            self.resize_token_embeddings(len(tokenizer))
             vision_config.im_start_token, vision_config.im_end_token = tokenizer.convert_tokens_to_ids([DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN])
-
-            if num_new_tokens > 0:
-                input_embeddings = self.get_input_embeddings().weight.data
-                output_embeddings = self.get_output_embeddings().weight.data
-
-                input_embeddings_avg = input_embeddings[:-num_new_tokens].mean(
-                    dim=0, keepdim=True)
-                output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(
-                    dim=0, keepdim=True)
-
-                input_embeddings[-num_new_tokens:] = input_embeddings_avg
-                output_embeddings[-num_new_tokens:] = output_embeddings_avg
 
             if tune_mm_mlp_adapter:
                 self.model.orig_embeds_params = [self.get_input_embeddings().weight.data.clone().to(device=device)]
@@ -1010,13 +994,6 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                     p.requires_grad = True
                 for p in self.get_output_embeddings().parameters():
                     p.requires_grad = False
-
-            if pretrain_mm_mlp_adapter:
-                mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
-                embed_tokens_weight = mm_projector_weights['model.embed_tokens.weight']
-                assert input_embeddings.shape == embed_tokens_weight.shape
-                assert num_new_tokens == 2
-                input_embeddings[-num_new_tokens:] = embed_tokens_weight[-num_new_tokens:]
 
         vision_config.im_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_IMAGE_PATCH_TOKEN])[0]
 
