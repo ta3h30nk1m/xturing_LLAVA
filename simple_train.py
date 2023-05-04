@@ -1,16 +1,26 @@
+import argparse
+
 from xturing.datasets import TextDataset
 from xturing.models import BaseModel
 
-# Load the dataset
-instruction_dataset = TextDataset("./mmc4")
+def main(args):
+    # Load the dataset
+    dataset = args.dataset
+    instruction_dataset = TextDataset(dataset)
 
-# Initialize the model
-model = BaseModel.create("llama_lora_int4")
+    # Initialize the model
+    model = BaseModel.create("llama_lora_int4")
 
-# Finetune the model
-model.finetune(dataset=instruction_dataset)
+    # Finetune the model
+    model.finetune(dataset=instruction_dataset)
 
-# Perform inference
-output = model.generate(texts=["Why LLM models are becoming so important?"])
+    # Perform inference
+    output = model.generate(texts=["Why LLM models are becoming so important?"])
 
-print("Generated output by the model: {}".format(output))
+    print("Generated output by the model: {}".format(output))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', default="./mmc4/")
+    args = parser.parse_args()
+    main(args)
