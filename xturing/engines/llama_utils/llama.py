@@ -298,7 +298,7 @@ class LlamaConfig(PretrainedConfig):
 
     def __init__(
         self,
-        vocab_size=32000,
+        vocab_size=32004,
         hidden_size=4096,
         intermediate_size=11008,
         num_hidden_layers=32,
@@ -1100,7 +1100,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         if vision_tower is not None and (input_ids.shape[1] != 1) and images is not None:
             # TODO: this is a modified multimodal LLM -- Haotian Liu
             vision_tower = vision_tower[0]  # HACK: for FSDP
-            #vision_tower = vision_tower.to(images.device)
+            vision_tower = vision_tower.to(images.device)
             with torch.no_grad():
                 if type(images) is list:
                     # variable length images
