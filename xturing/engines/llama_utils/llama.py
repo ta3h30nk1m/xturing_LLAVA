@@ -938,7 +938,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
 
-        self.visual_model = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")
+        self.visual_model = [CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")]
         self.mm_projector = torch.nn.Linear(1024, 4096)
 
         self.model = LlamaModel(config)
