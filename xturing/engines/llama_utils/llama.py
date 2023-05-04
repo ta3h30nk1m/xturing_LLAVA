@@ -1062,7 +1062,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         )
 
         if inputs_embeds is None:
-            inputs_embeds = self.embed_tokens(input_ids)
+            inputs_embeds = self.model.embed_tokens(input_ids)
 
         vision_tower = getattr(self, 'visual_model', None)
         orig_embeds_params = getattr(self, 'orig_embeds_params', None)
