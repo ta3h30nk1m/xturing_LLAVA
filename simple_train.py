@@ -7,7 +7,7 @@ def main(args):
     # Load the dataset
     dataset = args.dataset
     instruction_dataset = TextDataset(dataset)
-    print(len(instruction_dataset))
+    #print(len(instruction_dataset))
 
     # Initialize the model
     model = BaseModel.create("llama_lora_int4")

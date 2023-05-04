@@ -32,8 +32,8 @@ class TextDataset(BaseDataset):
                     for line in f.iter():
                         img = random.choice(line['image_info'])['raw_url']
                         text = random.choice(line['text_list'])
-                        print(img)
-                        print(text)
+                        #print(img)
+                        #print(text)
                         self.data.append({'images': img, 'text': text})
 
         #self._validate()
