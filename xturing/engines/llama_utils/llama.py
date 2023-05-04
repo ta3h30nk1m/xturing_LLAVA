@@ -1091,7 +1091,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                 image_features = [self.mm_projector(image_feature)[0] for image_feature in image_features]
             else:
                 image_features = self.mm_projector(image_features)
-            dummy_image_features = torch.zeros(256, 1024, device=inputs_embeds.device, dtype=inputs_embeds.dtype)
+            dummy_image_features = torch.zeros(256, 1024, device=inputs_embeds.device, dtype=self.mm_projector.weight.dtype)
             dummy_image_features = self.mm_projector(dummy_image_features)
 
             new_input_embeds = []
