@@ -13,6 +13,9 @@ import glob, os, random, jsonlines
 class TextDatasetMeta:
     pass
 
+from PIL import Image
+from io import BytesIO
+import os, requests
 
 class TextDataset(BaseDataset):
     config_name: str = "text_dataset"
@@ -32,9 +35,14 @@ class TextDataset(BaseDataset):
                     for line in f.iter():
                         img = random.choice(line['image_info'])['raw_url']
                         text = random.choice(line['text_list'])
+                        try:
+                            a = Image.open(BytesIO(requests.get(img).content)).convert('RGB')
+                            self.data.append({'images': img, 'text': text})
+                        except:
+                            continue
                         #print(img)
                         #print(text)
-                        self.data.append({'images': img, 'text': text})
+                        
 
         #self._validate()
         self._meta = TextDatasetMeta()
