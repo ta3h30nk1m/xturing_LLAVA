@@ -32,7 +32,7 @@ class TextDataCollator:
         label_masks = []
 
         for sample in batches:
-            input_img = self.transformer(Image.open(BytesIO(requests.get(sample["images"]).content)).convert('RGB') )
+            input_img = self.transformer(Image.open(BytesIO(requests.get(sample["images"], stream=True).content)).convert('RGB') )
             input_text = self.tokenizer(sample["text"])
             input_ids = input_text["input_ids"]
 
