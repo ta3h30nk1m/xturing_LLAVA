@@ -148,6 +148,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.set_default_dtype(torch.half)
         transformers.modeling_utils._init_weights = False
         #torch.set_default_dtype(torch.half)
+        #model = LlamaForCausalLM(config)
         model = Llava(config)#LlamaForCausalLM(config)#.from_pretrained("Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g") ### changed 
         torch.set_default_dtype(torch.float)
         model = model.eval()

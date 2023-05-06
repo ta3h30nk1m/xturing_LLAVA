@@ -1,6 +1,6 @@
 import argparse
 
-from xturing.datasets import InstructionDataset, TextDataset
+from xturing.datasets import TextDataset
 from xturing.models import BaseModel
 
 def main(args):
