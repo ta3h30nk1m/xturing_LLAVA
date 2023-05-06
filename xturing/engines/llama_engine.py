@@ -8,7 +8,7 @@ from torch import nn
 from transformers import AutoTokenizer
 
 from xturing.engines.causal import CausalEngine, CausalLoraEngine
-from xturing.engines.llama_utils import LlamaConfig, LlamaTokenizer, Llava#LlamaForCausalLM
+from xturing.engines.llama_utils import LlamaConfig, LlamaTokenizer, LlamaForCausalLM
 from xturing.engines.lora_engine import prepare_model_for_int8_training
 from xturing.engines.quant_utils import autotune_warmup, make_quant
 from xturing.utils.hub import ModelHub
@@ -126,8 +126,8 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
     def __init__(self, weights_path: Optional[Union[str, Path]] = None):
         model_name = "decapoda-research/llama-7b-hf"
 
-        if weights_path is None:
-            weights_path = ModelHub().load("x/llama_lora_int4")
+        # if weights_path is None:
+        #     weights_path = ModelHub().load("x/llama_lora_int4")
 
         config = LlamaConfig.from_pretrained(model_name)
 
@@ -148,11 +148,10 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.set_default_dtype(torch.half)
         transformers.modeling_utils._init_weights = False
         #torch.set_default_dtype(torch.half)
-        #model = LlamaForCausalLM(config)
-        model = Llava(config)#LlamaForCausalLM(config)#.from_pretrained("Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g") ### changed 
+        model = LlamaForCausalLM(config)
+        #model = Llava(config)#LlamaForCausalLM(config)#.from_pretrained("Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g") ### changed 
         torch.set_default_dtype(torch.float)
         model = model.eval()
-
         layers = find_layers(model)
         #print(layers)
         key_to_del = []
@@ -174,10 +173,17 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         # state_dict = torch.load(
         #     weights_path / Path("pytorch_model.bin"), map_location="cpu"
         # )
-        # new_state_dict = {}
-        # for key, value in state_dict.items():
-        #     new_state_dict[key[6:]] = value
-        # model.load_state_dict(new_state_dict, strict=False)
+        import wget
+        url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+        output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+
+        wget.download(url, output_path)
+        state_dict = torch.load(output_path)
+
+        new_state_dict = {}
+        for key, value in state_dict.items():
+            new_state_dict[key[6:]] = value
+        model.load_state_dict(new_state_dict, strict=False)
 
         if warmup_autotune:
             autotune_warmup(model)
