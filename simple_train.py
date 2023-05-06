@@ -9,12 +9,14 @@ from xturing.models import BaseModel
 def main(args):
     # Load the dataset
     dataset = args.dataset
-    
+   
     ###############################################
     # Todo : if /images folder not exist, unzip images.zip
     ###############################################
-
-    if not os.path.isdir(f"{dataset}/images") :
+    output_folder = "/app/output"
+    output_img_folder = "/app/output/images"
+    
+    if not os.path.isdir(f"{output_folder}/images") :
         print("No images folder. make it in app/output/images")
         
         # Path to the ZIP file
@@ -26,10 +28,12 @@ def main(args):
             # Extract all the files to the specified folder
             zip_ref.extractall(extract_path)
 
-        print(f"unzip Images.zip into {extract_path}completed.")    
+        print(f"unzip Images.zip into {extract_path} completed.")    
+        output_img_folder = extract_path
+    else :
+        print("already unziped Images.zip")
     
-    
-    instruction_dataset = InstructionDataset(dataset)
+    instruction_dataset = InstructionDataset(dataset, output_img_folder)
     print("datanum: ", len(instruction_dataset))
 
     # Initialize the model
