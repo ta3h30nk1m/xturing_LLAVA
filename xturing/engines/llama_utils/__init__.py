@@ -1,1 +1,1 @@
-from .llama import LlamaConfig, LlamaTokenizer, Llava, LlamaForCausalLM
+from .llama import LlamaConfig, LlamaTokenizer, LlamaForCausalLM
