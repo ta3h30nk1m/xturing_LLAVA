@@ -60,6 +60,7 @@ class InstructionDataset(BaseDataset):
             path = Path(path)
             assert Path(path).exists(), "path does not exist"
 
+            #path will be "app/inputs/datasets/LLaVa-CC3M-598K"
             #make data
             self.data = []
 
@@ -67,9 +68,9 @@ class InstructionDataset(BaseDataset):
                 chat_data = json.load(f)
             try:
                 for line in chat_data:
-                    text_ = ''
-                    image_ = os.path.join(path, line['image'])
-                    instruction_ = line['conversations'][0]['value']
+                    text_ = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
+                    image_ = os.path.join(path, "images" , line['image'])  
+                    instruction_ = 'Human: ' + line['conversations'][0]['value'] + '\nAssistant: '
                     target_ = line['conversations'][1]['value']
                     self.data.append({'text': text_, 'image': image_, 'instruction': instruction_, 'target': target_})
             except KeyError:
@@ -83,7 +84,7 @@ class InstructionDataset(BaseDataset):
 
         if promt_template is not None:
             list_prompt_template = ListPromptTemplate(
-                promt_template, input_variables=["instruction",  "text"]
+                promt_template, input_variables=["text", "instruction"]
             )
 
         self._meta = InstructionDatasetMeta(
