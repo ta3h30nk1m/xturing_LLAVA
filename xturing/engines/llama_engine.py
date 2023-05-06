@@ -178,7 +178,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
 
         wget.download(url, output_path)
-        state_dict = torch.load(output_path)
+        state_dict = torch.load(output_path, map_location='cpu')
 
         new_state_dict = {}
         for key, value in state_dict.items():
