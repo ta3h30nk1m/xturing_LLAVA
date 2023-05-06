@@ -8,7 +8,7 @@ from torch import nn
 from transformers import AutoTokenizer
 
 from xturing.engines.causal import CausalEngine, CausalLoraEngine
-from xturing.engines.llama_utils import LlamaConfig, LlamaForCausalLM, LlamaTokenizer
+from xturing.engines.llama_utils import LlamaConfig, LlamaTokenizer, Llava#LlamaForCausalLM
 from xturing.engines.lora_engine import prepare_model_for_int8_training
 from xturing.engines.quant_utils import autotune_warmup, make_quant
 from xturing.utils.hub import ModelHub
@@ -148,7 +148,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.set_default_dtype(torch.half)
         transformers.modeling_utils._init_weights = False
         #torch.set_default_dtype(torch.half)
-        model = LlamaForCausalLM.from_pretrained("Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g") ### changed 
+        model = Llava(config)#LlamaForCausalLM(config)#.from_pretrained("Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g") ### changed 
         torch.set_default_dtype(torch.float)
         model = model.eval()
 
@@ -170,13 +170,13 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         make_quant(model, layers, wbits, groupsize)
 
-        state_dict = torch.load(
-            weights_path / Path("pytorch_model.bin"), map_location="cpu"
-        )
-        new_state_dict = {}
-        for key, value in state_dict.items():
-            new_state_dict[key[6:]] = value
-        model.load_state_dict(new_state_dict, strict=False)
+        # state_dict = torch.load(
+        #     weights_path / Path("pytorch_model.bin"), map_location="cpu"
+        # )
+        # new_state_dict = {}
+        # for key, value in state_dict.items():
+        #     new_state_dict[key[6:]] = value
+        # model.load_state_dict(new_state_dict, strict=False)
 
         if warmup_autotune:
             autotune_warmup(model)

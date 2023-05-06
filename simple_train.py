@@ -1,12 +1,12 @@
 import argparse
 
-from xturing.datasets import InstructionDataset
+from xturing.datasets import InstructionDataset, TextDataset
 from xturing.models import BaseModel
 
 def main(args):
     # Load the dataset
     dataset = args.dataset
-    instruction_dataset = InstructionDataset(dataset)
+    instruction_dataset = TextDataset(dataset)
     print("datanum: ", len(instruction_dataset))
 
     # Initialize the model
