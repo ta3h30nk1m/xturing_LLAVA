@@ -6,6 +6,26 @@ from xturing.models import BaseModel
 def main(args):
     # Load the dataset
     dataset = args.dataset
+    
+    ###############################################
+    # Todo : if /images folder not exist, unzip images.zip
+    ###############################################
+
+    if not os.path.isdir(f"{dataset}/images") :
+        print("No images folder. make it in app/output/images")
+        
+        # Path to the ZIP file
+        zip_path = os.path.join(args.dataset, "images.zip")
+        extract_path = os.path.join(args.output, "images")  
+
+        # Open the ZIP file
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            # Extract all the files to the specified folder
+            zip_ref.extractall(extract_path)
+
+        print(f"unzip Images.zip into {extract_path}completed.")    
+    
+    
     instruction_dataset = InstructionDataset(dataset)
     print("datanum: ", len(instruction_dataset))
 
