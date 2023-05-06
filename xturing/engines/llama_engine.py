@@ -117,7 +117,9 @@ def find_layers(module, layers=[nn.Conv2d, nn.Linear], name=""):
         )
     return res
 
-
+#################
+# here to use Vicuna
+#################
 class LlamaLoraInt4Engine(CausalLoraEngine):
     config_name: str = "llama_lora_int4_engine"
 
