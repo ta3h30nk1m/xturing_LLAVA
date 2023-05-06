@@ -1,5 +1,6 @@
 import json
 import os
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Union
@@ -48,7 +49,7 @@ class InstructionDataset(BaseDataset):
 
     def __init__(
         self,
-        path: Union[str, Path, HFDataset, dict],   #kakao i cloud #path will be "app/inputs/datasets/LLaVa-CC3M-598K"  
+        path: Union[str, Path, HFDataset, dict],   #kakao i cloud #path will be "app/input/dataset/llava-cc3m-595k"   /app/input/dataset/{데이터세트 이름}
         infix_instruction: bool = False,
         promt_template: str = None,
     ):
@@ -61,8 +62,12 @@ class InstructionDataset(BaseDataset):
         else:    # <- excuted here
             path = Path(path)
             assert Path(path).exists(), "path does not exist"
-
             
+            # Todo : if /images folder not exist, unzip images.zip
+            if not os.path.isdir(f"{path}/images") :
+                zipfile.ZipFile('images.zip').extract('images')
+                print("unzip Images.zip completed.")
+                
             #make data
             self.data = []
 
