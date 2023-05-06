@@ -67,6 +67,7 @@ class InstructionDataset(BaseDataset):
             # Todo : if /images folder not exist, unzip images.zip
             ###############################################
             
+            """ moved into simple_train.py
             if not os.path.isdir(f"{path}/images") :
 
                 # Path to the ZIP file
@@ -79,7 +80,7 @@ class InstructionDataset(BaseDataset):
                     zip_ref.extractall(extract_path)
                     
                 print("unzip Images.zip completed.")
-                
+            """    
                 
             #make data
             self.data = []
