@@ -49,7 +49,8 @@ class InstructionDataset(BaseDataset):
 
     def __init__(
         self,
-        path: Union[str, Path, HFDataset, dict],   #kakao i cloud #path will be "app/input/dataset/llava-cc3m-595k"   /app/input/dataset/{데이터세트 이름}
+        path: Union[str, Path, HFDataset, dict],   # kakao i cloud #path will be "app/input/dataset/llava-cc3m-595k"   /app/input/dataset/{데이터세트 이름}
+        output_img_folder : Union[str,Path],        # unziped CC3M
         infix_instruction: bool = False,
         promt_template: str = None,
     ):
@@ -90,7 +91,8 @@ class InstructionDataset(BaseDataset):
             try:
                 for line in chat_data:
                     text_ = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
-                    image_ = os.path.join(path, "images" , line['image'])  
+                    #image_ = os.path.join(path, "images" , line['image'])  
+                    image_ = os.path.join(output_img_folder, line['image'])
                     instruction_ = 'Human: ' + line['conversations'][0]['value'] + '\nAssistant: '
                     target_ = line['conversations'][1]['value']
                     self.data.append({'text': text_, 'image': image_, 'instruction': instruction_, 'target': target_})
