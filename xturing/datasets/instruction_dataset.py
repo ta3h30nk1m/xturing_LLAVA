@@ -59,14 +59,27 @@ class InstructionDataset(BaseDataset):
             self.data = {"train": HFDataset.from_dict(path)}
             
             
-        else:    # <- excuted here
+        else:    # <- excuted from here
             path = Path(path)
             assert Path(path).exists(), "path does not exist"
             
+            ###############################################
             # Todo : if /images folder not exist, unzip images.zip
+            ###############################################
+            
             if not os.path.isdir(f"{path}/images") :
-                zipfile.ZipFile('images.zip').extract('images')
+
+                # Path to the ZIP file
+                zip_path = os.path.join(path, "images.zip")
+                extract_path = os.path.join(path, "images")  
+                
+                # Open the ZIP file
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    # Extract all the files to the specified folder
+                    zip_ref.extractall(extract_path)
+                    
                 print("unzip Images.zip completed.")
+                
                 
             #make data
             self.data = []
