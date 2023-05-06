@@ -1,5 +1,8 @@
 import argparse
 
+import os
+import zipfile
+
 from xturing.datasets import InstructionDataset
 from xturing.models import BaseModel
 
