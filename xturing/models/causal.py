@@ -85,12 +85,12 @@ class CausalModel(BaseModel):
             self.finetuning_args.optimizer_name,
         )
 
-    def finetune(self, dataset: Union[TextDataset, InstructionDataset]):
+    def finetune(self, dataset: Union[TextDataset, InstructionDataset], output_dir):
         assert dataset.config_name in [
             "text_dataset",
             "instruction_dataset",
         ], "Please make sure the dataset_type is text_dataset or instruction_dataset"
-        trainer = self._make_trainer(dataset)
+        trainer = self._make_trainer(dataset, output_dir = output_dir)
         trainer.fit()
 
     def evaluate(self, dataset: Union[TextDataset, InstructionDataset]):

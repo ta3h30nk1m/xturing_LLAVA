@@ -101,6 +101,7 @@ class LightningTrainer:
         use_deepspeed: bool = False,
         max_training_time_in_secs: Optional[int] = None,
         lora_type: int = 16,
+        output_dir: str = ""
     ):
         self.lightning_model = TuringLightningModule(
             model_engine=model_engine,
@@ -109,12 +110,13 @@ class LightningTrainer:
             batch_size=batch_size,
             learning_rate=learning_rate,
             optimizer_name=optimizer_name,
+            saved_path=output_dir
         )
 
-        checkpoints_dir_path = Path("saved_model")
+        # checkpoints_dir_path = Path("saved_model")
 
-        if not checkpoints_dir_path.exists():
-            checkpoints_dir_path.mkdir(exist_ok=True, parents=True)
+        # if not checkpoints_dir_path.exists():
+        #     checkpoints_dir_path.mkdir(exist_ok=True, parents=True)
 
         training_callbacks = []
 

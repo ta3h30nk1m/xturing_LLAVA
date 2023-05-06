@@ -50,7 +50,7 @@ class LlamaLoraInt8(CausalLoraInt8Model):
 class LlamaLoraInt4(CausalLoraInt8Model):
     config_name: str = "llama_lora_int4"
 
-    def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset]):
+    def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset], output_dir):
         return BaseTrainer.create(
             LightningTrainer.config_name,
             self.engine,
@@ -63,6 +63,7 @@ class LlamaLoraInt4(CausalLoraInt8Model):
             True,
             True,
             lora_type=32,
+            output_dir = output_dir
         )
 
     def __init__(self, weights_path: Optional[str] = None):

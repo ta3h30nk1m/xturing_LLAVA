@@ -13,7 +13,7 @@ def main(args):
     model = BaseModel.create("llama_lora_int4")
 
     # Finetune the model
-    model.finetune(dataset=instruction_dataset)
+    model.finetune(dataset=instruction_dataset, output_dir = args.output)
 
     # Perform inference
     output = model.generate(texts=["Why LLM models are becoming so important?"])
@@ -23,5 +23,6 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default="./mmc4/")
+    parser.add_argument('--output', default="/app/output/")
     args = parser.parse_args()
     main(args)
