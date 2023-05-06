@@ -48,7 +48,7 @@ class InstructionDataset(BaseDataset):
 
     def __init__(
         self,
-        path: Union[str, Path, HFDataset, dict],   #kakao i cloud  path will be app/inputs/datasets/LLaVa-CC3M-598K  
+        path: Union[str, Path, HFDataset, dict],   #kakao i cloud #path will be "app/inputs/datasets/LLaVa-CC3M-598K"  
         infix_instruction: bool = False,
         promt_template: str = None,
     ):
@@ -56,11 +56,13 @@ class InstructionDataset(BaseDataset):
             self.data = path
         elif isinstance(path, dict):
             self.data = {"train": HFDataset.from_dict(path)}
-        else:
+            
+            
+        else:    # <- excuted here
             path = Path(path)
             assert Path(path).exists(), "path does not exist"
 
-            #path will be "app/inputs/datasets/LLaVa-CC3M-598K"
+            
             #make data
             self.data = []
 
