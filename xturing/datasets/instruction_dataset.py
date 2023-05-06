@@ -48,7 +48,7 @@ class InstructionDataset(BaseDataset):
 
     def __init__(
         self,
-        path: Union[str, Path, HFDataset, dict],
+        path: Union[str, Path, HFDataset, dict],   #kakao i cloud  path will be app/inputs/datasets/LLaVa-CC3M-598K  
         infix_instruction: bool = False,
         promt_template: str = None,
     ):
