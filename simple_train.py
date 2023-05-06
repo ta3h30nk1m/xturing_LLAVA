@@ -16,7 +16,7 @@ def main(args):
         
         # Path to the ZIP file
         zip_path = os.path.join(args.dataset, "images.zip")
-        extract_path = os.path.join(args.output, "images")  
+        extract_path = os.path.join(args.output + "images")  
 
         # Open the ZIP file
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
