@@ -173,12 +173,14 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         # state_dict = torch.load(
         #     weights_path / Path("pytorch_model.bin"), map_location="cpu"
         # )
-        import wget
+        import requests
+        from io import BytesIO
         url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-        output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-
-        wget.download(url, output_path)
-        state_dict = torch.load(output_path, map_location='cpu')
+        # output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+        response = requests.get(url)
+        in_mem_file = BytesIO(response.content)
+        in_mem_file.seek(0)
+        state_dict = torch.load(in_mem_file, map_location='cpu')
 
         new_state_dict = {}
         for key, value in state_dict.items():
