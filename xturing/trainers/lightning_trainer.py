@@ -160,7 +160,8 @@ class LightningTrainer:
         else:
             training_callbacks = [
                 callbacks.ModelCheckpoint(
-                    dirpath=str(checkpoints_dir_path), save_on_train_epoch_end=True
+                    #dirpath=str(checkpoints_dir_path), save_on_train_epoch_end=True
+                    dirpath=str(output_dir), save_on_train_epoch_end=True
                 ),
             ]
 
