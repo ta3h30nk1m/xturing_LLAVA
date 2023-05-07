@@ -38,7 +38,7 @@ def main(args):
 
         print(f"unzip Images.zip into {extract_path} completed.")    
         output_img_folder = extract_path
-        print(f"{floor((time.time() - st_time)/60)} min {round((time.time() - starttime) % 60,3)} secs")
+        print(f"{floor((time.time() - st_time)/60)} min {round((time.time() - st_time) % 60,3)} secs")
     else :
         print("Already unziped Images.zip")
     
