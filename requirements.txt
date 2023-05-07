@@ -1,6 +1,7 @@
 torch
 torchvision
 transformers
+triton
 accelerate
 jsonlines
 pytorch-lightning
