@@ -1,5 +1,8 @@
 import argparse
 
+import time
+from math import floor
+
 import os
 import zipfile
 
@@ -15,9 +18,14 @@ def main(args):
     ###############################################
     output_folder = "/app/output"
     output_img_folder = "/app/output/images"
+
     
+    def get_ElapsedStr(starttime):
+    return
+
     if not os.path.isdir(f"{output_folder}/images") :
         print("No images folder. make it in app/output/images")
+        st_time = time.time()
         
         # Path to the ZIP file
         zip_path = os.path.join(args.dataset, "images.zip")
@@ -30,8 +38,9 @@ def main(args):
 
         print(f"unzip Images.zip into {extract_path} completed.")    
         output_img_folder = extract_path
+        print(f"{floor((time.time() - st_time)/60)} min {round((time.time() - starttime) % 60,3)} secs")
     else :
-        print("already unziped Images.zip")
+        print("Already unziped Images.zip")
     
     instruction_dataset = InstructionDataset(dataset, output_img_folder)
     print("datanum: ", len(instruction_dataset))
