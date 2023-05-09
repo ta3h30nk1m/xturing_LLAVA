@@ -95,7 +95,12 @@ class InstructionDataset(BaseDataset):
                     image_ = os.path.join(output_img_folder, line['image'])
                     instruction_ = 'Human: ' + line['conversations'][0]['value'] + '\nAssistant: '
                     target_ = line['conversations'][1]['value']
-                    self.data.append({'text': text_, 'image': image_, 'instruction': instruction_, 'target': target_})
+                    
+                    if os.path.isfile(image_) :
+                        self.data.append({'text': text_, 'image': image_, 'instruction': instruction_, 'target': target_})
+                    else :
+                        print(f"{images_} is in chat.json but not in images folder.")
+                  
             except KeyError:
                 raise ValueError(
                     "The json file should have keys text, instruction and target"
