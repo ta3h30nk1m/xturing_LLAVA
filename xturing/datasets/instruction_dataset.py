@@ -99,7 +99,7 @@ class InstructionDataset(BaseDataset):
                     if os.path.isfile(image_) :
                         self.data.append({'text': text_, 'image': image_, 'instruction': instruction_, 'target': target_})
                     else :
-                        print(f"{images_} is in chat.json but not in images folder.")
+                        print(f"{image_} is in chat.json but not in images folder.")
                   
             except KeyError:
                 raise ValueError(
