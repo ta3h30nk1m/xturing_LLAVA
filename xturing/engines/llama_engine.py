@@ -128,9 +128,11 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         # if weights_path is None:
         #     weights_path = ModelHub().load("x/llama_lora_int4")
-
+        
+        print("LLamaConfig_from_pretrained start")
         config = LlamaConfig.from_pretrained(model_name)
-
+        print("LLamaConfig_from_pretrained end")
+        
         saved_kaiming_uniform_ = torch.nn.init.kaiming_uniform_
         saved_uniform_ = torch.nn.init.uniform_
         saved_normal_ = torch.nn.init.normal_
@@ -180,7 +182,10 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         response = requests.get(url)
         in_mem_file = BytesIO(response.content)
         in_mem_file.seek(0)
+        
+        print("torch.load start")
         state_dict = torch.load(in_mem_file, map_location='cpu')
+        print("torch.load end")
 
         new_state_dict = {}
         for key, value in state_dict.items():
