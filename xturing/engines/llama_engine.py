@@ -126,8 +126,8 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
     def __init__(self, weights_path: Optional[Union[str, Path]] = None):
         model_name = "decapoda-research/llama-7b-hf"
 
-        # if weights_path is None:
-        #     weights_path = ModelHub().load("x/llama_lora_int4")
+        if weights_path is None:
+            weights_path = ModelHub().load("x/llama_lora_int4")
         
         print("LLamaConfig_from_pretrained start")
         config = LlamaConfig.from_pretrained(model_name)
@@ -172,20 +172,20 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         make_quant(model, layers, wbits, groupsize)
 
-        # state_dict = torch.load(
-        #     weights_path / Path("pytorch_model.bin"), map_location="cpu"
-        # )
-        import requests
-        from io import BytesIO
-        url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-        # output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-        response = requests.get(url)
-        in_mem_file = BytesIO(response.content)
-        in_mem_file.seek(0)
+        state_dict = torch.load(
+            weights_path / Path("pytorch_model.bin"), map_location="cpu"
+        )
+        # import requests
+        # from io import BytesIO
+        # url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+        # # output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+        # response = requests.get(url)
+        # in_mem_file = BytesIO(response.content)
+        # in_mem_file.seek(0)
         
-        print("torch.load start")
-        state_dict = torch.load(in_mem_file, map_location='cpu')
-        print("torch.load end")
+        # print("torch.load start")
+        # state_dict = torch.load(in_mem_file, map_location='cpu')
+        # print("torch.load end")
 
         new_state_dict = {}
         for key, value in state_dict.items():
