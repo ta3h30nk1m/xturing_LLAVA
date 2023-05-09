@@ -13,15 +13,14 @@ def main(args):
     # Load the dataset
     dataset = args.dataset
    
+
+    """
     ###############################################
     # Todo : if /images folder not exist, unzip images.zip
-    ###############################################
+    ############################################### this is only done in kiml
     output_folder = "/app/output"
     output_img_folder = "/app/output/images"
 
-    
-    def get_ElapsedStr(starttime):
-    return
 
     if not os.path.isdir(f"{output_folder}/images") :
         print("No images folder. make it in app/output/images")
@@ -41,8 +40,12 @@ def main(args):
         print(f"{floor((time.time() - st_time)/60)} min {round((time.time() - st_time) % 60,3)} secs")
     else :
         print("Already unziped Images.zip")
+        
+    img_folder = output_img_folder                          # in kiml
+    """
+    img_folder = os.path.join(args.dataset, "images")       # in colab or local
     
-    instruction_dataset = InstructionDataset(dataset, output_img_folder)
+    instruction_dataset = InstructionDataset(dataset, img_folder)
     print("datanum: ", len(instruction_dataset))
 
     # Initialize the model
