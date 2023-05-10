@@ -218,7 +218,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
-        model.model.initialize_vision_tokenizer(True, tokenizer, device='cpu')
+        model.initialize_vision_tokenizer(True, tokenizer, device='cpu')
 
         super().__init__(
             model=model,
