@@ -1165,6 +1165,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
+        print("inputs embeds: ",inputs_embeds)
         outputs = self.model(
             input_ids=None,
             attention_mask=attention_mask,
@@ -1175,9 +1176,11 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
         )
+        print("llm output: ", outputs[0])
 
         hidden_states = outputs[0]
         logits = self.lm_head(hidden_states)
+        print("lmhead output:", logits)
 
         loss = None
         if labels is not None:
