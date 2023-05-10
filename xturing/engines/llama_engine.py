@@ -228,9 +228,14 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.nn.init.normal_ = saved_normal_
 
         # only training mm_projector
-        torch.set_default_dtype(torch.half)
-        self.model.mm_projector = nn.Linear(1024, 4096)
         torch.set_default_dtype(torch.float)
+        self.model.mm_projector = nn.Linear(1024, 4096)
+        import math
+        stdv = 1. / math.sqrt(self.weight.size(1))
+        self.model.mm_projector.weight.data.uniform_(-stdv, stdv)
+        if self.model.mm_projector.bias is not None:
+            self.model.mm_projector.bias.data.uniform_(-stdv, stdv)
+
         if pretrain_mm_mlp_adapter is not None:
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
             self.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
