@@ -942,14 +942,14 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
 
-        # torch.set_default_dtype(torch.float)
-        torch.set_default_dtype(torch.half)
+        torch.set_default_dtype(torch.float)
         self.visual_model = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")
         self.visual_model.requires_grad_(False)
         # self.visual_model = self.visual_model.to(torch.float16)
 
         self.mm_projector = torch.nn.Linear(1024, 4096)
 
+        torch.set_default_dtype(torch.half)
         self.model = LlamaModel(config)
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
@@ -1131,11 +1131,12 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             for cur_input_ids, cur_input_embeds in zip(input_ids, inputs_embeds):
                 if (cur_input_ids == vision_tower.config.im_patch_token).sum() == 0:
                     # multimodal LLM, but the current sample is not multimodal
-                    cur_input_embeds = cur_input_embeds + (0. * dummy_image_features).sum()
+                    cur_input_embeds = cur_input_embeds + (0. * dummy_image_features).sum().to(cur_input_embeds.dtype)
                     new_input_embeds.append(cur_input_embeds)
+                    cur_image_idx += 1
                     continue
                 if vision_tower.config.use_im_start_end:
-                    cur_image_features = image_features[cur_image_idx]
+                    cur_image_features = image_features[cur_image_idx].to(cur_input_embeds.dtype)
                     num_patches = cur_image_features.shape[0]
                     if (cur_input_ids == vision_tower.config.im_start_token).sum() != (cur_input_ids == vision_tower.config.im_end_token).sum():
                         raise ValueError("The number of image start tokens and image end tokens should be the same.")
@@ -1152,7 +1153,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                         cur_image_idx += 1
                     new_input_embeds.append(cur_new_input_embeds)
                 else:
-                    cur_image_features = image_features[cur_image_idx]
+                    cur_image_features = image_features[cur_image_idx].to(cur_input_embeds.dtype)
                     num_patches = cur_image_features.shape[0]
                     if (cur_input_ids == vision_tower.config.im_patch_token).sum() != num_patches:
                         raise ValueError("The number of image patch tokens should be the same as the number of image patches.")
@@ -1165,7 +1166,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                     else:
                         cur_new_input_embeds = torch.cat((cur_input_embeds[:mask_index_start], cur_image_features, cur_input_embeds[mask_index_start+num_patches:]), dim=0)
                     new_input_embeds.append(cur_new_input_embeds)
-            print("new_input embed: ", new_input_embeds)
+                    cur_image_idx += 1
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
