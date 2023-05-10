@@ -172,9 +172,9 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         make_quant(model, layers, wbits, groupsize)
 
-        state_dict = torch.load(
-            weights_path / Path("pytorch_model.bin"), map_location="cpu"
-        )
+        # state_dict = torch.load(
+        #     weights_path / Path("pytorch_model.bin"), map_location="cpu"
+        # )
         # import requests
         # from io import BytesIO
         import wget
@@ -193,6 +193,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         new_state_dict = {}
         for key, value in state_dict.items():
+            print(key)
             new_state_dict[key[6:]] = value
         model.load_state_dict(new_state_dict, strict=False)
 
