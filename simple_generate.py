@@ -68,8 +68,9 @@ def test(args):
     model = BaseModel.create("llama_lora_int4", weights_path=weights_path, pretrain_mm_mlp_adapter = mm_projector_path)
     model.engine.model = model.engine.model.to("cuda")
     
-    mm_use_im_start_end = getattr(model.engine.model.config, "mm_use_im_start_end", False)
-    vision_config = model.engine.model.visual_model.config
+    vision_config = model.engine.model.model.model.visual_model.config
+    mm_use_im_start_end = getattr(vision_config, "mm_use_im_start_end", False)
+    
     image_token_len = (vision_config.image_size // vision_config.patch_size) ** 2
 
     # questions = [json.loads(q) for q in open(os.path.expanduser(args.question_file), "r")]

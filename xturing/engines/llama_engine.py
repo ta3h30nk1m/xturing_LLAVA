@@ -239,7 +239,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         if pretrain_mm_mlp_adapter is not None:
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
-            self.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
+            self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
         else:
             import wget
             url = "https://huggingface.co/liuhaotian/LLaVA-7b-delta-v0/resolve/main/mm_projector.bin"
@@ -247,7 +247,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             print("download mm_projector model")
             wget.download(url, output_path)
             state_dict = torch.load(output_path, map_location='cpu')
-            self.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in state_dict.items()})
+            self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in state_dict.items()})
 
         if(first_stage):
             print("performing first stage")
