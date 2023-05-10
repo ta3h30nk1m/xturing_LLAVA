@@ -1126,8 +1126,8 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             dummy_image_features = torch.zeros(256, 1024, device=inputs_embeds.device, dtype=self.mm_projector.weight.dtype)
             dummy_image_features = self.mm_projector(dummy_image_features)
 
-            print("img feature: ", image_features)
-            print("dummy: ", dummy_image_features)
+            #print("img feature: ", image_features)
+            #print("dummy: ", dummy_image_features)
             new_input_embeds = []
             cur_image_idx = 0
             for cur_input_ids, cur_input_embeds in zip(input_ids, inputs_embeds):
@@ -1172,7 +1172,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
-        print("inputs embeds: ",inputs_embeds)
+        #print("inputs embeds: ",inputs_embeds)
         outputs = self.model(
             input_ids=None,
             attention_mask=attention_mask,
@@ -1183,11 +1183,11 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
         )
-        print("llm output: ", outputs[0])
+        #print("llm output: ", outputs[0])
 
         hidden_states = outputs[0]
         logits = self.lm_head(hidden_states)
-        print("lmhead output:", logits)
+        #print("lmhead output:", logits)
 
         loss = None
         if labels is not None:
