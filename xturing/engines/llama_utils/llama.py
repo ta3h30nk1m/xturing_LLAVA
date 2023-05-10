@@ -1093,6 +1093,8 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
 
         if inputs_embeds is None:
             inputs_embeds = self.model.embed_tokens(input_ids)
+        
+        torch.set_printoptions(profile="full")
 
         vision_tower = self.visual_model#getattr(self, 'visual_model', None)
         orig_embeds_params = getattr(self, 'orig_embeds_params', None)
