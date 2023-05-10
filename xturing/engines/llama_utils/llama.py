@@ -945,7 +945,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         torch.set_default_dtype(torch.float)
         self.visual_model = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")
         self.visual_model.requires_grad_(False)
-        self.visual_model = self.visual_model.to(torch.float16)
+        # self.visual_model = self.visual_model.to(torch.float16)
 
         self.mm_projector = torch.nn.Linear(1024, 4096)
 
