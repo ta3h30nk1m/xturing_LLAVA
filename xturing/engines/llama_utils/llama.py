@@ -943,7 +943,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         super().__init__(config)
 
         torch.set_default_dtype(torch.float)
-        self.visual_model = [CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")]
+        self.visual_model = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")
         self.mm_projector = torch.nn.Linear(1024, 4096)
 
         torch.set_default_dtype(torch.half)
@@ -973,7 +973,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
     
     def initialize_vision_tokenizer(self, mm_use_im_start_end=True, tokenizer=None, device='cuda',
                                     tune_mm_mlp_adapter=True, pretrain_mm_mlp_adapter=None):
-        vision_config = self.visual_model[0].config
+        vision_config = self.visual_model.config
         vision_config.use_im_start_end = mm_use_im_start_end
         tokenizer.add_tokens([DEFAULT_IMAGE_PATCH_TOKEN], special_tokens=True)
         self.resize_token_embeddings(len(tokenizer))
@@ -1109,12 +1109,14 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         if inputs_embeds is None:
             inputs_embeds = self.model.embed_tokens(input_ids)
 
+        print("input embeds: ", inputs_embeds)
+
         vision_tower = getattr(self, 'visual_model', None)
         orig_embeds_params = getattr(self, 'orig_embeds_params', None)
         if vision_tower is not None and (input_ids.shape[1] != 1) and images is not None:
             # TODO: this is a modified multimodal LLM -- Haotian Liu
-            vision_tower = vision_tower[0]  # HACK: for FSDP
-            vision_tower = vision_tower.to(images.device)
+            #vision_tower = vision_tower[0]  # HACK: for FSDP
+            #vision_tower = vision_tower.to(images.device)
             with torch.no_grad():
                 if type(images) is list:
                     # variable length images
@@ -1179,6 +1181,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
+        print("input embed before into llm: ", inputs_embeds)
         outputs = self.model(
             input_ids=None,
             attention_mask=attention_mask,
@@ -1191,7 +1194,9 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         )
 
         hidden_states = outputs[0]
+        print("hidden state: ", hidden_states)
         logits = self.lm_head(hidden_states)
+        print("logits: ", logits)
 
         loss = None
         if labels is not None:
@@ -1219,12 +1224,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         )
 
     def prepare_inputs_for_generation(
-        self,
-        input_ids,
-        past_key_values=None,
-        attention_mask=None,
-        inputs_embeds=None,
-        **kwargs,
+        self, input_ids, past_key_values=None, attention_mask=None, inputs_embeds=None, **kwargs
     ):
         if past_key_values:
             input_ids = input_ids[:, -1:]
@@ -1240,6 +1240,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                 "past_key_values": past_key_values,
                 "use_cache": kwargs.get("use_cache"),
                 "attention_mask": attention_mask,
+                "images": kwargs.get("images", None),
             }
         )
         return model_inputs
