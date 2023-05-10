@@ -183,21 +183,26 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
                 new_state_dict[key[6:]] = value
             model.load_state_dict(new_state_dict, strict=False)
         else:
-        # import requests
-        # from io import BytesIO
-            import wget
-            url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-            output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-            print("download vicuna model")
-            wget.download(url, output_path)
-            print("done download vicuna model")
-        # response = requests.get(url)
-        # in_mem_file = BytesIO(response.content)
-        # in_mem_file.seek(0)
-            print("torch.load start")
-            state_dict = torch.load(output_path, map_location='cpu')
-            print("torch.load end")
-            model.load_state_dict(state_dict, strict=False)
+            # import wget
+            # url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+            # output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+            # print("download vicuna model")
+            # wget.download(url, output_path)
+            # print("done download vicuna model")
+            # print("torch.load start")
+            # state_dict = torch.load(output_path, map_location='cpu')
+            # print("torch.load end")
+            # model.load_state_dict(state_dict, strict=False)
+            weights_path = ModelHub().load("x/llama_lora_int4")
+            state_dict = torch.load(
+                weights_path / Path("pytorch_model.bin"), map_location="cpu"
+            )
+            new_state_dict = {}
+            for key, value in state_dict.items():
+                # print(key)
+                new_state_dict[key[6:]] = value
+            model.load_state_dict(new_state_dict, strict=False)
+
 
         if warmup_autotune:
             autotune_warmup(model)
@@ -213,7 +218,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
-        model.initialize_vision_tokenizer(True, tokenizer, device='cpu')
+        model.model.initialize_vision_tokenizer(True, tokenizer, device='cpu')
 
         super().__init__(
             model=model,
@@ -234,7 +239,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         if pretrain_mm_mlp_adapter is not None:
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
-            self.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
+            self.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
         else:
             import wget
             url = "https://huggingface.co/liuhaotian/LLaVA-7b-delta-v0/resolve/main/mm_projector.bin"
@@ -242,14 +247,14 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             print("download mm_projector model")
             wget.download(url, output_path)
             state_dict = torch.load(output_path, map_location='cpu')
-            self.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in state_dict.items()})
+            self.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in state_dict.items()})
 
         if(first_stage):
             print("performing first stage")
             self.model.requires_grad_(False)
-            for p in self.model.mm_projector.parameters():
+            for p in self.model.model.mm_projector.parameters():
                 p.requires_grad = True
         else:
             print("performing second stage")
-            for p in self.model.mm_projector.parameters():
+            for p in self.model.model.mm_projector.parameters():
                 p.requires_grad = True
