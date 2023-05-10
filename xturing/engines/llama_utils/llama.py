@@ -943,11 +943,11 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         super().__init__(config)
 
         torch.set_default_dtype(torch.float)
-        self.visual_model = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")
+        self.visual_model = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14", torch_dtype=torch.float16)
         self.visual_model.requires_grad_(False)
         # self.visual_model = self.visual_model.to(torch.float16)
 
-        self.mm_projector = torch.nn.Linear(1024, 4096)
+        self.mm_projector = torch.nn.Linear(1024, 4096, dtype=torch.float16)
 
         torch.set_default_dtype(torch.half)
         self.model = LlamaModel(config)
@@ -1105,13 +1105,13 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                     # variable length images
                     image_features = []
                     for image in images:
-                        image_forward_out = vision_tower(image.unsqueeze(0), output_hidden_states=True)
+                        image_forward_out = vision_tower(image.unsqueeze(0).to(torch.float16), output_hidden_states=True)
                         select_hidden_state_layer = -2#getattr(self.config, "mm_vision_select_layer", -1)
                         select_hidden_state = image_forward_out.hidden_states[select_hidden_state_layer]
                         image_feature = select_hidden_state[:, 1:]
                         image_features.append(image_feature)
                 else:
-                    image_forward_outs = vision_tower(images, output_hidden_states=True)
+                    image_forward_outs = vision_tower(images.to(torch.float16), output_hidden_states=True)
                     select_hidden_state_layer = -2#getattr(self.config, "mm_vision_select_layer", -1)
                     select_hidden_state = image_forward_outs.hidden_states[select_hidden_state_layer]
                     image_features = select_hidden_state[:, 1:]
