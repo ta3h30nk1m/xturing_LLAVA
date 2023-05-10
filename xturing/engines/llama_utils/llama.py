@@ -944,6 +944,9 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
 
         torch.set_default_dtype(torch.float)
         self.visual_model = CLIPVisionModel.from_pretrained("openai/clip-vit-large-patch14")
+        self.visual_model.requires_grad_(False)
+        self.visual_model = self.visual_model.to(torch.float16)
+
         self.mm_projector = torch.nn.Linear(1024, 4096)
 
         torch.set_default_dtype(torch.half)
@@ -1072,25 +1075,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                 for more detail.
             return_dict (`bool`, *optional*):
                 Whether or not to return a [`~utils.ModelOutput`] instead of a plain tuple.
-
-        Returns:
-
-        Example:
-
-        ```python
-        >>> from transformers import AutoTokenizer, LlamaForCausalLM
-
-        >>> model = LlamaForCausalLM.from_pretrained(PATH_TO_CONVERTED_WEIGHTS)
-        >>> tokenizer = AutoTokenizer.from_pretrained(PATH_TO_CONVERTED_TOKENIZER)
-
-        >>> prompt = "Hey, are you consciours? Can you talk to me?"
-        >>> inputs = tokenizer(prompt, return_tensors="pt")
-
-        >>> # Generate
-        >>> generate_ids = model.generate(inputs.input_ids, max_length=30)
-        >>> tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-        "Hey, are you consciours? Can you talk to me?\nI'm not consciours, but I can talk to you."
-        ```"""
+        """
 
         output_attentions = (
             output_attentions
@@ -1109,11 +1094,9 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         if inputs_embeds is None:
             inputs_embeds = self.model.embed_tokens(input_ids)
 
-        print("input embeds: ", inputs_embeds)
-
         vision_tower = getattr(self, 'visual_model', None)
         orig_embeds_params = getattr(self, 'orig_embeds_params', None)
-        if vision_tower is not None and (input_ids.shape[1] != 1) and images is not None:
+        if (input_ids.shape[1] != 1) and images is not None:
             # TODO: this is a modified multimodal LLM -- Haotian Liu
             #vision_tower = vision_tower[0]  # HACK: for FSDP
             #vision_tower = vision_tower.to(images.device)
@@ -1138,6 +1121,9 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                 image_features = self.mm_projector(image_features)
             dummy_image_features = torch.zeros(256, 1024, device=inputs_embeds.device, dtype=self.mm_projector.weight.dtype)
             dummy_image_features = self.mm_projector(dummy_image_features)
+
+            print("image_features: ", image_features)
+            print("dummpy image features: ", dummy_image_features)
 
             new_input_embeds = []
             cur_image_idx = 0
@@ -1178,6 +1164,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                     else:
                         cur_new_input_embeds = torch.cat((cur_input_embeds[:mask_index_start], cur_image_features, cur_input_embeds[mask_index_start+num_patches:]), dim=0)
                     new_input_embeds.append(cur_new_input_embeds)
+            print("new_input_embeds: ", new_input_embeds)
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
@@ -1194,9 +1181,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         )
 
         hidden_states = outputs[0]
-        print("hidden state: ", hidden_states)
         logits = self.lm_head(hidden_states)
-        print("logits: ", logits)
 
         loss = None
         if labels is not None:

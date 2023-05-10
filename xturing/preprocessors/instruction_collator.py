@@ -8,6 +8,65 @@ from xturing.datasets import InstructionDatasetMeta
 from PIL import Image
 from torchvision import transforms
 
+from typing import Dict, Optional, Sequence
+
+DEFAULT_IMAGE_TOKEN = "<image>"
+DEFAULT_IMAGE_PATCH_TOKEN = "<im_patch>"
+DEFAULT_IM_START_TOKEN = "<im_start>"
+DEFAULT_IM_END_TOKEN = "<im_end>"
+
+# def preprocess_multimodal(
+#     sources: Sequence[str],
+#     cur_token_len: int,
+# ) -> Dict:
+#     image_token_len = cur_token_len
+
+#     for source in sources:
+#         if multimodal_cfg['sep_image_conv_front']:
+#             assert DEFAULT_IMAGE_TOKEN in source[0]['value']
+#             source[0]['value'] = source[0]['value'].replace(DEFAULT_IMAGE_TOKEN, '').strip()
+#             source[0]['value'] = DEFAULT_IMAGE_TOKEN + conversation_lib.default_conversation.sep + conversation_lib.default_conversation.roles[0] + ": " + source[0]['value']
+#         for sentence in source:
+#             replace_token = DEFAULT_IMAGE_PATCH_TOKEN * image_token_len
+#             if multimodal_cfg['use_im_start_end']:
+#                 replace_token = DEFAULT_IM_START_TOKEN + replace_token + DEFAULT_IM_END_TOKEN
+#             sentence["value"] = sentence["value"].replace(DEFAULT_IMAGE_TOKEN, replace_token)
+
+#     return sources
+
+# def preprocess(
+#     sources: Sequence[str],
+#     tokenizer: transformers.PreTrainedTokenizer,
+# ) -> Dict:
+#     """
+#     Given a list of sources, each is a conversation list. This transform:
+#     1. Add signal '### ' at the beginning each sentence, with end signal '\n';
+#     2. Concatenate conversations together;
+#     3. Tokenize the concatenated conversation;
+#     4. Make a deepcopy as the target. Mask human words with IGNORE_INDEX.
+#     """
+#     if conversation_lib.default_conversation.version == "v1":
+#         return preprocess_v1(sources, tokenizer)
+#     if conversation_lib.default_conversation.version == "mpt":
+#         return preprocess_mpt(sources, tokenizer)
+#     # add end signal and concatenate together
+#     conversations = []
+#     for source in sources:
+#         header = f"{conversation_lib.default_conversation.system}\n\n"
+#         conversation = _add_speaker_and_signal(header, source)
+#         conversations.append(conversation)
+#     # tokenize conversations
+#     conversations_tokenized = _tokenize_fn(conversations, tokenizer)
+#     input_ids = conversations_tokenized["input_ids"]
+#     targets = copy.deepcopy(input_ids)
+#     for target, source in zip(targets, sources):
+#         tokenized_lens = _tokenize_fn([header] + [s["value"] for s in source],
+#                                       tokenizer)["input_ids_lens"]
+#         speakers = [sentence["from"] for sentence in source]
+#         _mask_targets(target, tokenized_lens, speakers)
+
+#     return dict(input_ids=input_ids, labels=targets)
+
 class InstructionDataCollator:
     config_name = "instruction_dataset"
 
