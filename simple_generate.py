@@ -97,7 +97,7 @@ def test(args):
     else:
         image = Image.open(image_file)
     # image.save(os.path.join(save_image_folder, image_file))
-        image_tensor = image_processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+        image_tensor = image_processor.preprocess(image, return_tensors='pt')['pixel_values'][0].unsqueeze(0).half().cuda()
 
     input_ids = torch.as_tensor(inputs.input_ids).cuda()
 
@@ -125,7 +125,7 @@ def test(args):
     with torch.inference_mode():
         output_ids = model.engine.model.generate(
             input_ids,
-            images=image_tensor.unsqueeze(0).half().cuda(),
+            images=image_tensor,
             do_sample=True,
             temperature=0.7,
             max_new_tokens=1024,
