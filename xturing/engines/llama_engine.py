@@ -222,6 +222,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
                 "v_proj",
             ],
         )
+        print("after init")
 
         torch.nn.init.kaiming_uniform_ = saved_kaiming_uniform_
         torch.nn.init.uniform_ = saved_uniform_
@@ -230,9 +231,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         # only training mm_projector
         torch.set_default_dtype(torch.float)
         self.model.mm_projector = nn.Linear(1024, 4096)
-        torch.set_printoptions(profile="full")
         print(self.model.mm_projector.weight)
-        print(self.model.mm_projector.bias)
 
         if pretrain_mm_mlp_adapter is not None:
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
