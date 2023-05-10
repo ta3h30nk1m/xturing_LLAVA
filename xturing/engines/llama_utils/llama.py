@@ -1115,7 +1115,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                     select_hidden_state_layer = -2#getattr(self.config, "mm_vision_select_layer", -1)
                     select_hidden_state = image_forward_outs.hidden_states[select_hidden_state_layer]
                     image_features = select_hidden_state[:, 1:]
-            print("image feature from clip: ", image_feature)
+            print("image feature from clip: ", image_features)
             if type(images) is list:
                 image_features = [self.mm_projector(image_feature)[0] for image_feature in image_features]
             else:
