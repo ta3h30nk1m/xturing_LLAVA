@@ -1132,7 +1132,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                 if (cur_input_ids == vision_tower.config.im_patch_token).sum() == 0:
                     # multimodal LLM, but the current sample is not multimodal
                     #cur_input_embeds = cur_input_embeds + (0. * dummy_image_features).sum().to(cur_input_embeds.dtype)
-                    cur_input_embeds = image_features.to(cur_input_embeds.dtype) + cur_input_embeds
+                    cur_input_embeds = torch.cat((image_features.to(cur_input_embeds.dtype), cur_input_embeds), dim = 0)
                     new_input_embeds.append(cur_input_embeds)
                     cur_image_idx += 1
                     continue
