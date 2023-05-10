@@ -25,8 +25,8 @@ from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 
 class CausalModel(BaseModel):
-    def __init__(self, engine: str, weights_path: Optional[str] = None):
-        self.engine = BaseEngine.create(engine, weights_path)
+    def __init__(self, engine: str, weights_path: Optional[str] = None, first_stage=True, pretrain_mm_mlp_adapter=None):
+        self.engine = BaseEngine.create(engine, weights_path, first_stage, pretrain_mm_mlp_adapter)
 
         self.model_name = engine.replace("_engine", "")
 
@@ -195,8 +195,8 @@ class CausalInt8Model(CausalModel):
 
 
 class CausalLoraModel(CausalModel):
-    def __init__(self, engine: str, weights_path: Optional[str] = None):
-        super().__init__(engine, weights_path)
+    def __init__(self, engine: str, weights_path: Optional[str] = None, first_stage=True, pretrain_mm_mlp_adapter=None):
+        super().__init__(engine, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter)
 
     def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset]):
         return BaseTrainer.create(
@@ -214,6 +214,6 @@ class CausalLoraModel(CausalModel):
 
 
 class CausalLoraInt8Model(CausalLoraModel):
-    def __init__(self, engine: str, weights_path: Optional[str] = None):
+    def __init__(self, engine: str, weights_path: Optional[str] = None, first_stage=True, pretrain_mm_mlp_adapter=None):
         assert_not_cpu_int8()
-        super().__init__(engine, weights_path)
+        super().__init__(engine, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter)
