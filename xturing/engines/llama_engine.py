@@ -29,6 +29,8 @@ class LLamaEngine(CausalEngine):
     def save(self, saving_path: Union[str, Path]):
         self.model.save_pretrained(saving_path)
         self.tokenizer.save_pretrained(saving_path)
+        #save mm_projector 
+        torch.save(self.model.mm_projector.state_dict(), os.path.join(saving_path, "mm_projector.bin"))
 
 
 class LlamaLoraEngine(CausalLoraEngine):
