@@ -1116,6 +1116,8 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                     select_hidden_state = image_forward_outs.hidden_states[select_hidden_state_layer]
                     image_features = select_hidden_state[:, 1:]
             print("shape: ", image_features.shape)
+            print("image features from clipi: ", image_features)
+            print(image_features[0][0])
             if type(images) is list:
                 image_features = [self.mm_projector(image_feature)[0] for image_feature in image_features]
             else:
