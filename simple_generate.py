@@ -161,7 +161,7 @@ def test(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--weights_path", type=str, default="")
-    parser.add_argument("--imagefile", type=str, default="")
+    parser.add_argument("--image_file", type=str, default="")
     parser.add_argument("--text", type=str, default="")
     parser.add_argument("--conv-mode", type=str, default="simple")
     args = parser.parse_args()
