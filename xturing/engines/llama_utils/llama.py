@@ -1115,12 +1115,10 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                     select_hidden_state_layer = -2#getattr(self.config, "mm_vision_select_layer", -1)
                     select_hidden_state = image_forward_outs.hidden_states[select_hidden_state_layer]
                     image_features = select_hidden_state[:, 1:]
-            print("img feature: ", image_features)
             if type(images) is list:
                 image_features = [self.mm_projector(image_feature)[0] for image_feature in image_features]
             else:
                 image_features = self.mm_projector(image_features)
-            print("after mm projector: ", image_features)
             dummy_image_features = torch.zeros(256, 1024, device=inputs_embeds.device, dtype=self.mm_projector.weight.dtype)
             dummy_image_features = self.mm_projector(dummy_image_features)
 
