@@ -126,7 +126,7 @@ def test(args):
     stopping_criteria = KeywordsStoppingCriteria(keywords, model.engine.tokenizer, input_ids)
 
     with torch.inference_mode():
-        output_ids = model.engine.model.generate(
+        output_ids = model.engine.model.model.generate(
             input_ids,
             images=image_tensor,
             do_sample=True,
