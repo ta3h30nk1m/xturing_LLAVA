@@ -155,12 +155,14 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.set_default_dtype(torch.float)
         model = model.eval()
         layers = find_layers(model)
+        print("layers: ", layers)
         #print(layers)
         key_to_del = []
         for name in ["lm_head", "visual_model", "mm_projector"]:
             for key in layers.keys():
                 if name in key:
                     key_to_del.append(key)
+        print("key_to_del: ", key_to_del)
         for key in key_to_del:
             del layers[key]
             # if name in layers:
@@ -189,6 +191,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         new_state_dict = {}
         for key, value in state_dict.items():
+            print(key)
             new_state_dict[key[6:]] = value
         model.load_state_dict(new_state_dict, strict=False)
 

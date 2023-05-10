@@ -1094,7 +1094,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         if inputs_embeds is None:
             inputs_embeds = self.model.embed_tokens(input_ids)
 
-        vision_tower = getattr(self, 'visual_model', None)
+        vision_tower = self.visual_model#getattr(self, 'visual_model', None)
         orig_embeds_params = getattr(self, 'orig_embeds_params', None)
         if (input_ids.shape[1] != 1) and images is not None:
             # TODO: this is a modified multimodal LLM -- Haotian Liu
@@ -1112,6 +1112,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                         image_features.append(image_feature)
                 else:
                     image_forward_outs = vision_tower(images, output_hidden_states=True)
+                    print("clip forward output: ", image_forward_outs)
                     select_hidden_state_layer = -2#getattr(self.config, "mm_vision_select_layer", -1)
                     select_hidden_state = image_forward_outs.hidden_states[select_hidden_state_layer]
                     image_features = select_hidden_state[:, 1:]
