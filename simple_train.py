@@ -49,19 +49,26 @@ def main(args):
     print("datanum: ", len(instruction_dataset))
 
     # Initialize the model
-    model = BaseModel.create("llama_lora_int4")
+    if args.weights_path == "":
+        weights_path = None
+        mm_projector_path = None
+    else:
+        weights_path = args.weights_path
+        mm_projector_path = os.path.join(weights_path, "mm_projector.bin")
+    model = BaseModel.create("llama_lora_int4", weights_path=weights_path, pretrain_mm_mlp_adapter=mm_projector_path, first_stage=args.first_stage)
 
     # Finetune the model
+    if args.weights_path != "":
+        # load hyperparameters back from checkpoint
+        pass
     model.finetune(dataset=instruction_dataset, output_dir = args.output)
-
-    # Perform inference
-    output = model.generate(texts=["Why LLM models are becoming so important?"])
-
-    print("Generated output by the model: {}".format(output))
+    print("done")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', default="./mmc4/")
+    parser.add_argument('--dataset', default="")
+    parser.add_argument('--weights_path', default="")
+    parser.add_argument('--first_stage', type=bool, default=True)
     parser.add_argument('--output', default="/app/output/")
     args = parser.parse_args()
     main(args)
