@@ -66,6 +66,8 @@ def test(args):
         mm_projector_path = os.path.join(weights_path, "mm_projector.bin")
     image_processor = CLIPImageProcessor.from_pretrained("openai/clip-vit-large-patch14", torch_dtype=torch.float16)
     model = BaseModel.create("llama_lora_int4", weights_path=weights_path, pretrain_mm_mlp_adapter = mm_projector_path)
+    model.engine.model = model.engine.model.to("cuda")
+    
     mm_use_im_start_end = getattr(model.engine.model.config, "mm_use_im_start_end", False)
     vision_config = model.engine.model.visual_model.config
     image_token_len = (vision_config.image_size // vision_config.patch_size) ** 2
