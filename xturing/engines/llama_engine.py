@@ -148,7 +148,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         ## change to load from huggingface directly
         #######
         torch.set_default_dtype(torch.half)
-        transformers.modeling_utils._init_weights = False
+        # transformers.modeling_utils._init_weights = False
         #torch.set_default_dtype(torch.half)
         model = LlamaForCausalLM(config)
         #model = Llava(config)#LlamaForCausalLM(config)#.from_pretrained("Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g") ### changed 
@@ -208,11 +208,6 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         model.gradient_checkpointing_enable()
         model.enable_input_require_grads()
 
-        # only training mm_projector
-        model.requires_grad_(False)
-        for p in model.mm_projector.parameters():
-            p.requires_grad = True
-
         tokenizer = LlamaTokenizer.from_pretrained(model_name, add_bos_token=False)
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -233,7 +228,9 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.nn.init.normal_ = saved_normal_
 
         # only training mm_projector
+        torch.set_default_dtype(torch.half)
         self.model.mm_projector = nn.Linear(1024, 4096)
+        torch.set_default_dtype(torch.float)
         if pretrain_mm_mlp_adapter is not None:
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
             self.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
