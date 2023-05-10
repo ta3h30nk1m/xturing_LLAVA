@@ -193,7 +193,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         new_state_dict = {}
         for key, value in state_dict.items():
-            print(key)
+            # print(key)
             new_state_dict[key[6:]] = value
         model.load_state_dict(new_state_dict, strict=False)
         # model.load_state_dict(state_dict, strict=False)
