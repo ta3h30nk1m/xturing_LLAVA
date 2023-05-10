@@ -123,7 +123,7 @@ def find_layers(module, layers=[nn.Conv2d, nn.Linear], name=""):
 class LlamaLoraInt4Engine(CausalLoraEngine):
     config_name: str = "llama_lora_int4_engine"
 
-    def __init__(self, weights_path: Optional[Union[str, Path]] = None):
+    def __init__(self, weights_path: Optional[Union[str, Path]] = None, first_stage: bool = True, pretrain_mm_mlp_adapter:str = None):
         model_name = "decapoda-research/llama-7b-hf"
 
         if weights_path is None:
@@ -155,14 +155,12 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.set_default_dtype(torch.float)
         model = model.eval()
         layers = find_layers(model)
-        print("layers: ", layers)
         #print(layers)
         key_to_del = []
         for name in ["lm_head", "visual_model", "mm_projector"]:
             for key in layers.keys():
                 if name in key:
                     key_to_del.append(key)
-        print("key_to_del: ", key_to_del)
         for key in key_to_del:
             del layers[key]
             # if name in layers:
@@ -191,7 +189,6 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         new_state_dict = {}
         for key, value in state_dict.items():
-            print(key)
             new_state_dict[key[6:]] = value
         model.load_state_dict(new_state_dict, strict=False)
 
@@ -228,3 +225,16 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.nn.init.kaiming_uniform_ = saved_kaiming_uniform_
         torch.nn.init.uniform_ = saved_uniform_
         torch.nn.init.normal_ = saved_normal_
+
+        # only training mm_projector
+        self.model.mm_projector = nn.Linear(1024, 4096)
+        if pretrain_mm_mlp_adapter is not None:
+            mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
+            self.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
+        if(first_stage):
+            self.model.requires_grad_(False)
+            for p in self.model.mm_projector.parameters():
+                p.requires_grad = True
+        else:
+            for p in self.model.mm_projector.parameters():
+                p.requires_grad = True
