@@ -231,7 +231,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.set_default_dtype(torch.float)
         self.model.mm_projector = nn.Linear(1024, 4096)
         import math
-        stdv = 1. / math.sqrt(self.weight.size(1))
+        stdv = 1. / math.sqrt(self.model.mm_projector.weight.size(1))
         self.model.mm_projector.weight.data.uniform_(-stdv, stdv)
         if self.model.mm_projector.bias is not None:
             self.model.mm_projector.bias.data.uniform_(-stdv, stdv)
