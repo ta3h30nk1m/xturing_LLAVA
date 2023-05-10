@@ -1093,8 +1093,6 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
 
         if inputs_embeds is None:
             inputs_embeds = self.model.embed_tokens(input_ids)
-        
-        torch.set_printoptions(profile="full")
 
         vision_tower = self.visual_model#getattr(self, 'visual_model', None)
         orig_embeds_params = getattr(self, 'orig_embeds_params', None)
@@ -1133,7 +1131,8 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
             for cur_input_ids, cur_input_embeds in zip(input_ids, inputs_embeds):
                 if (cur_input_ids == vision_tower.config.im_patch_token).sum() == 0:
                     # multimodal LLM, but the current sample is not multimodal
-                    cur_input_embeds = cur_input_embeds + (0. * dummy_image_features).sum().to(cur_input_embeds.dtype)
+                    #cur_input_embeds = cur_input_embeds + (0. * dummy_image_features).sum().to(cur_input_embeds.dtype)
+                    cur_input_embeds = image_features.to(cur_input_embeds.dtype) + cur_input_embeds
                     new_input_embeds.append(cur_input_embeds)
                     cur_image_idx += 1
                     continue
