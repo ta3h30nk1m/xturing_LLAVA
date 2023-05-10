@@ -250,6 +250,10 @@ class LoraModel(torch.nn.Module):
         }
         key_list = [key for key, _ in self.model.named_modules()]
         for key in key_list:
+            if "visual_model" in key:
+                continue
+            if "mm_projector" in key:
+                continue
             if isinstance(self.peft_config.target_modules, str):
                 target_module_found = re.fullmatch(self.peft_config.target_modules, key)
             else:
