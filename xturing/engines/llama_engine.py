@@ -252,9 +252,9 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         if(first_stage):
             print("performing first stage")
             self.model.requires_grad_(False)
-            for p in self.model.model.mm_projector.parameters():
+            for p in self.model.model.model.mm_projector.parameters():
                 p.requires_grad = True
         else:
             print("performing second stage")
-            for p in self.model.model.mm_projector.parameters():
+            for p in self.model.model.model.mm_projector.parameters():
                 p.requires_grad = True
