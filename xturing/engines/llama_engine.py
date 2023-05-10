@@ -191,11 +191,12 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         state_dict = torch.load(output_path, map_location='cpu')
         print("torch.load end")
 
-        new_state_dict = {}
-        for key, value in state_dict.items():
-            print(key)
-            new_state_dict[key[6:]] = value
-        model.load_state_dict(new_state_dict, strict=False)
+        # new_state_dict = {}
+        # for key, value in state_dict.items():
+        #     print(key)
+        #     new_state_dict[key[6:]] = value
+        # model.load_state_dict(new_state_dict, strict=False)
+        model.load_state_dict(state_dict, strict=False)
 
         if warmup_autotune:
             autotune_warmup(model)
