@@ -118,6 +118,7 @@ class InstructionDataCollator:
                 combine = self.meta.list_prompt_template.build(
                     instruction=sample["instruction"], text=sample["text"]
                 )
+                print(combine)
                 input_combine = self.tokenizer(combine)
                 input_ids = input_combine["input_ids"] + input_target["input_ids"]
                 label_mask = [False] * len(input_combine["input_ids"]) + [True] * len(
