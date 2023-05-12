@@ -217,3 +217,60 @@ class InstructionDataCollator:
         batch["targets"] = torch.roll(batch["input_ids"], -1, -1)
 
         return batch
+    """ # from LLaVa dataset __get_item__
+    def __getitem__(self, i) -> Dict[str, torch.Tensor]:
+        sources = self.list_data_dict[i]
+        if isinstance(i, int):
+            sources = [sources]
+        assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
+        if 'image' in sources[0]:
+            image_file = self.list_data_dict[i]['image']
+            image_folder = self.multimodal_cfg['image_folder']
+            processor = self.multimodal_cfg['image_processor']
+            image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
+            if self.multimodal_cfg['image_aspect_ratio'] == 'keep':
+                max_hw, min_hw = max(image.size), min(image.size)
+                aspect_ratio = max_hw / min_hw
+                max_len, min_len = 448, 224
+                shortest_edge = int(min(max_len / aspect_ratio, min_len))
+                image = processor.preprocess(image, return_tensors='pt', do_center_crop=False, size={"shortest_edge": shortest_edge})['pixel_values'][0]
+            elif self.multimodal_cfg['image_aspect_ratio'] == 'pad':
+                def expand2square(pil_img, background_color):
+                    width, height = pil_img.size
+                    if width == height:
+                        return pil_img
+                    elif width > height:
+                        result = Image.new(pil_img.mode, (width, width), background_color)
+                        result.paste(pil_img, (0, (width - height) // 2))
+                        return result
+                    else:
+                        result = Image.new(pil_img.mode, (height, height), background_color)
+                        result.paste(pil_img, ((height - width) // 2, 0))
+                        return result
+                image = expand2square(image, tuple(int(x*255) for x in processor.image_mean))
+                image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+            else:
+                image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+            cur_token_len = (image.shape[1]//14) * (image.shape[2]//14)   # FIXME: 14 is hardcoded patch size
+            sources = preprocess_multimodal(
+                copy.deepcopy([e["conversations"] for e in sources]),
+                self.multimodal_cfg, cur_token_len)
+        else:
+            sources = copy.deepcopy([e["conversations"] for e in sources])
+        data_dict = preprocess(
+            sources,
+            self.tokenizer)
+        if isinstance(i, int):
+            data_dict = dict(input_ids=data_dict["input_ids"][0],
+                             labels=data_dict["labels"][0])
+
+        # image exist in the data
+        if 'image' in self.list_data_dict[i]:
+            data_dict['image'] = image
+        elif self.multimodal_cfg['is_multimodal']:
+            # image does not exist in the data, but the model is multimodal
+            crop_size = self.multimodal_cfg['image_processor'].crop_size
+            data_dict['image'] = torch.zeros(3, crop_size['height'], crop_size['width'])
+        return data_dict
+"""
+# from LLaVa dataset __get_item__
