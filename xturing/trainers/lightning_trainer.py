@@ -82,6 +82,9 @@ class TuringLightningModule(pl.LightningModule):
         loss = self.model_engine.training_step(batch)
         self.losses.append(loss.item())
         self.log("loss", loss.item(), prog_bar=True)
+        
+        if batch_idx % 100 == 0 :
+            print(f"Runtime log : batch_idx = {batch_idx}, loss = {loss.item()}")
 
         return loss
 
