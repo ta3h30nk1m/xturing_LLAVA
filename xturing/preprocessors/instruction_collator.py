@@ -110,10 +110,12 @@ class InstructionDataCollator:
         label_masks = []
 
         for sample in batches:
-            input_text = self.tokenizer(sample["text"])
-            input_img = self.transformer(Image.open(sample["image"]).convert('RGB'))
-            input_target = self.tokenizer(sample["target"])
-
+            input_text = self.tokenizer(sample["text"])                         # system msg
+            input_img = self.transformer(Image.open(sample["image"]).convert('RGB'))   
+            input_target = self.tokenizer(sample["target"])                     
+            
+            
+            #####  Now meta.list_prompt_template is None ###  Not Enter
             if self.meta.list_prompt_template is not None:
                 print("entered if 1")
                 combine = self.meta.list_prompt_template.build(
@@ -125,8 +127,11 @@ class InstructionDataCollator:
                 label_mask = [False] * len(input_combine["input_ids"]) + [True] * len(
                     input_target["input_ids"]
                 )
+            ##########################################################
+            
+            ##### Now meta.infix_instruction is None , Enter Here #####
             elif not self.meta.infix_instruction:
-                print("entered elif 2")
+                #print("entered elif 2")
                 input_instruction = self.tokenizer(sample["instruction"])
                 input_ids = (
                     input_instruction["input_ids"]
@@ -139,7 +144,9 @@ class InstructionDataCollator:
                     + [False] * len(input_text["input_ids"])
                     + [True] * len(input_target["input_ids"])
                 )
-            else:
+            ############################################################
+                
+            else:  #####  Not Enter
                 print("entered else 3")
                 parts = self._process_instruction(sample["instruction"])
 
@@ -164,6 +171,7 @@ class InstructionDataCollator:
                     + [True] * len(input_target["input_ids"])
                     + [False] * len(input_instructions[2]["input_ids"])
                 )
+            ################# end
 
             input_ids = input_ids[: self.max_length - 1]
             input_ids.append(self.tokenizer.eos_token_id)
