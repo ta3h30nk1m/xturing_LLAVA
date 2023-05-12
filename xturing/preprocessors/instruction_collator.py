@@ -15,11 +15,17 @@ DEFAULT_IMAGE_PATCH_TOKEN = "<im_patch>"
 DEFAULT_IM_START_TOKEN = "<im_start>"
 DEFAULT_IM_END_TOKEN = "<im_end>"
 
+
 # def preprocess_multimodal(
 #     sources: Sequence[str],
+#     multimodal_cfg: dict,
 #     cur_token_len: int,
 # ) -> Dict:
+#     is_multimodal = multimodal_cfg['is_multimodal']
+#     # image_token_len = multimodal_cfg['image_token_len']
 #     image_token_len = cur_token_len
+#     if not is_multimodal:
+#         return sources
 
 #     for source in sources:
 #         if multimodal_cfg['sep_image_conv_front']:
