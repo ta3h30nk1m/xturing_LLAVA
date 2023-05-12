@@ -54,41 +54,44 @@ class InstructionDataset(BaseDataset):
         infix_instruction: bool = False,
         promt_template: str = None,
     ):
-        if isinstance(path, HFDataset) or isinstance(path, DatasetDict):
+        
+        
+        if isinstance(path, HFDataset) or isinstance(path, DatasetDict): # not use
             self.data = path
-        elif isinstance(path, dict):
+        elif isinstance(path, dict):  # not use
             self.data = {"train": HFDataset.from_dict(path)}
-            
-            
-        else:    # <- excuted from here
+
+        else:    # <- since path is str, excuted from here
             path = Path(path)
             assert Path(path).exists(), "path does not exist"
             
-            ###############################################
-            # Todo : if /images folder not exist, unzip images.zip
-            ###############################################
-            
-            """ moved into simple_train.py
-            if not os.path.isdir(f"{path}/images") :
-
-                # Path to the ZIP file
-                zip_path = os.path.join(path, "images.zip")
-                extract_path = os.path.join(path, "images")  
                 
-                # Open the ZIP file
-                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                    # Extract all the files to the specified folder
-                    zip_ref.extractall(extract_path)
-                    
-                print("unzip Images.zip completed.")
-            """    
-                
-            #make data
+            #make data (load data to memory)
             self.data = []
             NumsOfImgsNotExist = 0
 
             with open(os.path.join(path, "chat.json"), "r") as f:
                 chat_data = json.load(f)
+                """
+                [
+                  {
+                    "id": "GCC_train_002582585",
+                    "image": "GCC_train_002582585.jpg",
+                    "conversations": [
+                      {
+                        "from": "human",
+                        "value": "Provide a brief description of the given image.\n<image>"
+                      },
+                      {
+                        "from": "gpt",
+                        "value": "olive oil is a healthy ingredient used liberally ."
+                      }
+                    ]
+                  },
+                    
+                  ...
+                ]
+                """
             try:
                 for line in chat_data:
                     text_ = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
