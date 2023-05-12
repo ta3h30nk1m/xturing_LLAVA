@@ -133,12 +133,17 @@ class InstructionDataCollator:
             elif not self.meta.infix_instruction:
                 #print("entered elif 2")
                 input_instruction = self.tokenizer(sample["instruction"])
+#                 input_ids = (
+#                     input_instruction["input_ids"]
+#                     + input_text["input_ids"]
+#                     + input_target["input_ids"]
+#                 )
+                # fix here. Instruction dataset Variable Name is different between LLaVA and xturing
                 input_ids = (
-                    input_instruction["input_ids"]
-                    + input_text["input_ids"]
+                    input_text["input_ids"]
+                    + input_instruction["input_ids"]
                     + input_target["input_ids"]
                 )
-
                 label_mask = (
                     [False] * len(input_instruction["input_ids"])
                     + [False] * len(input_text["input_ids"])
