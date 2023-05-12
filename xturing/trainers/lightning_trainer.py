@@ -71,7 +71,7 @@ class TuringLightningModule(pl.LightningModule):
             self.train_dataset,
             collate_fn=self.preprocessor,
             shuffle=True,
-            num_workers=1,
+            num_workers=2,
             pin_memory=True,
             batch_size=self.batch_size,
         )
