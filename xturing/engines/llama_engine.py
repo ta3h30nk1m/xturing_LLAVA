@@ -244,7 +244,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         
         else:
             output_path = "./mm_projector.bin"
-            if os.path.exists(output_path):
+            if not os.path.exists(output_path):
                 import wget
                 url = "https://huggingface.co/liuhaotian/LLaVA-7b-delta-v0/resolve/main/mm_projector.bin"
                 print("download mm_projector model")

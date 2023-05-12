@@ -1124,12 +1124,12 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
                     raise ValueError(f"Unexpected embed_tokens_weight shape. Pretrained: {embed_tokens_weight.shape}. Current: {input_embeddings.shape}. Numer of new tokens: {num_new_tokens}.")
             else:
                 output_path = "./mm_projector.bin"
-                if os.path.exists(output_path):
+                if not os.path.exists(output_path):
                     import wget
                     url = "https://huggingface.co/liuhaotian/LLaVA-7b-delta-v0/resolve/main/mm_projector.bin"
                     print("download mm_projector model")
                     wget.download(url, output_path)
-                state_dict = torch.load(output_path, map_location='cpu')
+                mm_projector_weights = torch.load(output_path, map_location='cpu')
                 embed_tokens_weight = mm_projector_weights['model.embed_tokens.weight']
                 assert num_new_tokens == 2
                 if input_embeddings.shape == embed_tokens_weight.shape:
