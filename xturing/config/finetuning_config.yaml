@@ -34,7 +34,7 @@ llama_lora_int8:
   max_length: 256
 
 llama_lora_int4:
-  learning_rate: 1e-3
+  learning_rate: 1e-2
   weight_decay: 0.01
   num_train_epochs: 1
   batch_size: 64
