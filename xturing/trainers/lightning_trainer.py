@@ -33,15 +33,22 @@ class TuringLightningModule(pl.LightningModule):
         self.pytorch_model = self.model_engine.model#.mm_projector
         self.train_dataset = train_dataset
         self.preprocessor = preprocessor
-
+        
+        print("Entered trainers/TuringLightningModule")
+        print(f"called preprocessor = {self.preprocessor}")
+        
         # Hyperparameters
         self.batch_size = batch_size
         self.learning_rate = learning_rate
 
         self.optimizer_name = optimizer_name
         self.saved_path = saved_path
-
+        
         self.losses = []
+        
+        print("trainers/TuringLightningModule __init__ finished")
+        print(f"\tbatchsize = {self.batch_size}")
+        print(f"\saved_path = {self.saved_path}")
 
     def configure_optimizers(self):
         if self.optimizer_name == "adamw":
