@@ -243,11 +243,12 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
         
         else:
-            import wget
-            url = "https://huggingface.co/liuhaotian/LLaVA-7b-delta-v0/resolve/main/mm_projector.bin"
             output_path = "./mm_projector.bin"
-            print("download mm_projector model")
-            wget.download(url, output_path)
+            if os.path.exists(output_path):
+                import wget
+                url = "https://huggingface.co/liuhaotian/LLaVA-7b-delta-v0/resolve/main/mm_projector.bin"
+                print("download mm_projector model")
+                wget.download(url, output_path)
             state_dict = torch.load(output_path, map_location='cpu')
             self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in state_dict.items()})
 
