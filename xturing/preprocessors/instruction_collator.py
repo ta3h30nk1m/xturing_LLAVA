@@ -16,6 +16,8 @@ DEFAULT_IM_START_TOKEN = "<im_start>"
 DEFAULT_IM_END_TOKEN = "<im_end>"
 
 
+image_token_len = 256  ## todo : Hard coded, fix later
+
 # def preprocess_multimodal(
 #     sources: Sequence[str],
 #     multimodal_cfg: dict,
@@ -116,7 +118,9 @@ class InstructionDataCollator:
         label_masks = []
 
         for sample in batches:
-            input_text = self.tokenizer(sample["text"])                         # system msg
+            system_msg = sample["text"]
+            system_msg = system_msg + '\n' + DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_PATCH_TOKEN * image_token_len + DEFAULT_IM_END_TOKEN
+            input_text = self.tokenizer(system_msg)                         # system msg
             input_img = self.transformer(Image.open(sample["image"]).convert('RGB'))   
             input_target = self.tokenizer(sample["target"])                     
             
