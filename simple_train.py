@@ -21,7 +21,6 @@ def main(args):
     output_folder = "/app/output"
     output_img_folder = "/app/output/images"
 
-
     if not os.path.isdir(f"{output_folder}/images") :
         print("No images folder. make it in app/output/images")
         st_time = time.time()
@@ -43,6 +42,8 @@ def main(args):
         
     img_folder = output_img_folder                          # in kiml
     """
+    
+    
     img_folder = os.path.join(args.dataset, "images")       # in colab or local
     
     instruction_dataset = InstructionDataset(dataset, img_folder)
