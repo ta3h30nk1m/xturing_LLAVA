@@ -115,6 +115,7 @@ class InstructionDataCollator:
             input_target = self.tokenizer(sample["target"])
 
             if self.meta.list_prompt_template is not None:
+                print("entered if 1")
                 combine = self.meta.list_prompt_template.build(
                     instruction=sample["instruction"], text=sample["text"]
                 )
@@ -124,43 +125,45 @@ class InstructionDataCollator:
                 label_mask = [False] * len(input_combine["input_ids"]) + [True] * len(
                     input_target["input_ids"]
                 )
-#             elif not self.meta.infix_instruction:
-#                 input_instruction = self.tokenizer(sample["instruction"])
-#                 input_ids = (
-#                     input_instruction["input_ids"]
-#                     + input_text["input_ids"]
-#                     + input_target["input_ids"]
-#                 )
+            elif not self.meta.infix_instruction:
+                print("entered elif 2")
+                input_instruction = self.tokenizer(sample["instruction"])
+                input_ids = (
+                    input_instruction["input_ids"]
+                    + input_text["input_ids"]
+                    + input_target["input_ids"]
+                )
 
-#                 label_mask = (
-#                     [False] * len(input_instruction["input_ids"])
-#                     + [False] * len(input_text["input_ids"])
-#                     + [True] * len(input_target["input_ids"])
-#                 )
-#             else:
-#                 parts = self._process_instruction(sample["instruction"])
+                label_mask = (
+                    [False] * len(input_instruction["input_ids"])
+                    + [False] * len(input_text["input_ids"])
+                    + [True] * len(input_target["input_ids"])
+                )
+            else:
+                print("entered else 3")
+                parts = self._process_instruction(sample["instruction"])
 
-#                 input_instructions = [self.tokenizer(part) for part in parts]
+                input_instructions = [self.tokenizer(part) for part in parts]
 
-#                 assert (
-#                     len(input_instructions) == 3
-#                 ), "There should be exactly three parts in the instruction."
+                assert (
+                    len(input_instructions) == 3
+                ), "There should be exactly three parts in the instruction."
 
-#                 input_ids = (
-#                     input_instructions[0]["input_ids"]
-#                     + input_text["input_ids"]
-#                     + input_instructions[1]["input_ids"]
-#                     + input_target["input_ids"]
-#                     + input_instructions[2]["input_ids"]
-#                 )
+                input_ids = (
+                    input_instructions[0]["input_ids"]
+                    + input_text["input_ids"]
+                    + input_instructions[1]["input_ids"]
+                    + input_target["input_ids"]
+                    + input_instructions[2]["input_ids"]
+                )
 
-#                 label_mask = (
-#                     [False] * len(input_instructions[0]["input_ids"])
-#                     + [False] * len(input_text["input_ids"])
-#                     + [False] * len(input_instructions[1]["input_ids"])
-#                     + [True] * len(input_target["input_ids"])
-#                     + [False] * len(input_instructions[2]["input_ids"])
-#                 )
+                label_mask = (
+                    [False] * len(input_instructions[0]["input_ids"])
+                    + [False] * len(input_text["input_ids"])
+                    + [False] * len(input_instructions[1]["input_ids"])
+                    + [True] * len(input_target["input_ids"])
+                    + [False] * len(input_instructions[2]["input_ids"])
+                )
 
             input_ids = input_ids[: self.max_length - 1]
             input_ids.append(self.tokenizer.eos_token_id)
