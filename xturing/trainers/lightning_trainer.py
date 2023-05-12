@@ -34,8 +34,8 @@ class TuringLightningModule(pl.LightningModule):
         self.train_dataset = train_dataset
         self.preprocessor = preprocessor
         
-        print("Entered trainers/TuringLightningModule")
-        print(f"called preprocessor = {self.preprocessor}")
+        print("\nEntered trainers/TuringLightningModule")
+        print(f"called preprocessor = {self.preprocessor}\n")
         
         # Hyperparameters
         self.batch_size = batch_size
@@ -46,9 +46,9 @@ class TuringLightningModule(pl.LightningModule):
         
         self.losses = []
         
-        print("trainers/TuringLightningModule __init__ finished")
+        print("\ntrainers/TuringLightningModule __init__ finished")
         print(f"\tbatchsize = {self.batch_size}")
-        print(f"\saved_path = {self.saved_path}")
+        print(f"\tsaved_path = {self.saved_path}\n")
 
     def configure_optimizers(self):
         if self.optimizer_name == "adamw":
