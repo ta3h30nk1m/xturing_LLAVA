@@ -55,12 +55,13 @@ class InstructionDataset(BaseDataset):
         promt_template: str = None,
     ):
         
-        
-        if isinstance(path, HFDataset) or isinstance(path, DatasetDict): # not use
+        ################################ not use
+        if isinstance(path, HFDataset) or isinstance(path, DatasetDict):
             self.data = path
-        elif isinstance(path, dict):  # not use
+        elif isinstance(path, dict): 
             self.data = {"train": HFDataset.from_dict(path)}
-
+        ################################
+        
         else:    # <- since path is str, excuted from here
             path = Path(path)
             assert Path(path).exists(), "path does not exist"
