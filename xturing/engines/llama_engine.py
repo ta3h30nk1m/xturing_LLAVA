@@ -236,10 +236,12 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         # only training mm_projector
         torch.set_default_dtype(torch.float)
+           
 
         if pretrain_mm_mlp_adapter is not None:
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
             self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
+        
         else:
             import wget
             url = "https://huggingface.co/liuhaotian/LLaVA-7b-delta-v0/resolve/main/mm_projector.bin"
@@ -254,7 +256,8 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             self.model.requires_grad_(False)
             for p in self.model.model.model.mm_projector.parameters():
                 p.requires_grad = True
-        else:
+        else: 
             print("performing second stage")
             for p in self.model.model.model.mm_projector.parameters():
                 p.requires_grad = True
+            ##  todo : apply LoRA to Vicuna
