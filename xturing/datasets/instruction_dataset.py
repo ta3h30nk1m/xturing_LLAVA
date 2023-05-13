@@ -110,19 +110,20 @@ class InstructionDataset(BaseDataset):
                     "The json file should have keys text, instruction and target"
                 )
             print(f"imgs detected : {len(self.data)},  imgs not exists : {NumsOfImgsNotExist}")
+ 
         #self._validate()
 
-        # list_prompt_template = None
+        list_prompt_template = None
 
-        # if promt_template is not None:
-        #     list_prompt_template = ListPromptTemplate(
-        #         promt_template, input_variables=["text", "instruction"]
-        #     )
+        if promt_template is not None:
+            list_prompt_template = ListPromptTemplate(
+                promt_template, input_variables=["text", "instruction"]
+            )
 
-        # self._meta = InstructionDatasetMeta(
-        #     infix_instruction=infix_instruction,
-        #     list_prompt_template=list_prompt_template,
-        # )
+        self._meta = InstructionDatasetMeta(
+            infix_instruction=infix_instruction,
+            list_prompt_template=list_prompt_template,
+        )
 
     # def _validate(self):
     #     # check is hf dataset has train split and if it has column text, and if there are any other - it should be target
