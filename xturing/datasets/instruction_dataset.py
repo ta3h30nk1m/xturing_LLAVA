@@ -20,14 +20,6 @@ from xturing.self_instruct import (
 )
 from xturing.utils.utils import create_temp_directory, extract_text_from_directory
 
-from xturing.preprocessors.conversation import conv_templates
-
-IGNORE_INDEX = -100
-DEFAULT_IMAGE_TOKEN = "<image>"
-DEFAULT_IMAGE_PATCH_TOKEN = "<im_patch>"
-DEFAULT_IM_START_TOKEN = "<im_start>"
-DEFAULT_IM_END_TOKEN = "<im_end>"
-
 class ListPromptTemplate:
     def __init__(
         self,
