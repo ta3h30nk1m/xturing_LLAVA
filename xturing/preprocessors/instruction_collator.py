@@ -74,7 +74,7 @@ class InstructionDataCollator:
             images.append(input_img)
 
             conv = conv_templates['vicuna_v1_1'].copy()
-            instruction = sample["instrunction"]
+            instruction = sample["instruction"]
             replace_token = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_PATCH_TOKEN * image_token_len + DEFAULT_IM_END_TOKEN
             instruction = instruction.replace(DEFAULT_IMAGE_TOKEN, replace_token)
             conv.append_message(conv.roles[0], sample["instruction"])
