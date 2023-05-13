@@ -183,25 +183,25 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
                 new_state_dict[key[6:]] = value
             model.load_state_dict(new_state_dict, strict=False)
         else:
-            # import wget
-            # url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-            # output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-            # print("download vicuna model")
-            # wget.download(url, output_path)
-            # print("done download vicuna model")
-            # print("torch.load start")
-            # state_dict = torch.load(output_path, map_location='cpu')
-            # print("torch.load end")
-            # model.load_state_dict(state_dict, strict=False)
-            weights_path = ModelHub().load("x/llama_lora_int4")
-            state_dict = torch.load(
-                weights_path / Path("pytorch_model.bin"), map_location="cpu"
-            )
-            new_state_dict = {}
-            for key, value in state_dict.items():
-                # print(key)
-                new_state_dict[key[6:]] = value
-            model.load_state_dict(new_state_dict, strict=False)
+            import wget
+            url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+            output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+            print("download vicuna model")
+            wget.download(url, output_path)
+            print("done download vicuna model")
+            print("torch.load start")
+            state_dict = torch.load(output_path, map_location='cpu')
+            print("torch.load end")
+            model.load_state_dict(state_dict, strict=False)
+            # weights_path = ModelHub().load("x/llama_lora_int4")
+            # state_dict = torch.load(
+            #     weights_path / Path("pytorch_model.bin"), map_location="cpu"
+            # )
+            # new_state_dict = {}
+            # for key, value in state_dict.items():
+            #     # print(key)
+            #     new_state_dict[key[6:]] = value
+            # model.load_state_dict(new_state_dict, strict=False)
 
 
         if warmup_autotune:
