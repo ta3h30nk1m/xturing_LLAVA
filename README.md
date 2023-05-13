@@ -47,5 +47,6 @@ python simple_generate.py --weights_path ./checkpoint --image_file ./image.png -
 - --image_file: input image file
 - --text: input text
 
-## Chat??
-???
+## Todo
+- --Second stage Training, RLHF, Gradio WebUI(chat), Refactoring Codes
+ 
