@@ -34,6 +34,13 @@ class InstructionDataCollator:
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.meta = meta
+        
+        print("InstructionDataCollator __init__ :")
+        print(f"\t max_length : {self.max_length}")
+        print(f"\t tokenizer : {self.tokenizer}")
+        print(f"\t transformer : {self.transformer}")
+        print(f"\t meta : {self.meta}")
+        print("InstructionDataCollator __init__  finished")
 
     def _process_instruction(self, instruction, tags=None):
         # check if the instruction is valid
