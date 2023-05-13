@@ -48,8 +48,10 @@ python simple_generate.py --weights_path ./checkpoint --image_file ./image.png -
 - --text: input text
 
 ## Todo
+
 - Second stage Training
 - RLHF
+- Make Command selecting Vision Tower (CLIP, DeepFloyd, ...)
 - Gradio WebUI(chat)
 - Refactoring Codes
  
