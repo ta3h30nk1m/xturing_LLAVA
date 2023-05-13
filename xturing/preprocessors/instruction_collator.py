@@ -98,6 +98,7 @@ class InstructionDataCollator:
 
             rounds = conversation.split(conv.sep2)
             print(conversation)
+            print(target)
             cur_len = 1
             target[:cur_len] = IGNORE_INDEX
 
@@ -110,8 +111,10 @@ class InstructionDataCollator:
                     break
                 parts[0] += sep
                 round_len = len(self.tokenizer(rou).input_ids)
+                print(self.tokenizer(rou).input_ids)
                 print(round_len)
                 instruction_len = len(self.tokenizer(parts[0]).input_ids) - 2
+                print(self.tokenizer(parts[0]).input_ids)
                 print(instruction_len)
 
                 target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
@@ -126,7 +129,8 @@ class InstructionDataCollator:
                         f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
                         f" (ignored)"
                     )
-                    exit(0)
+                    import sys
+                    sys.exit()
 
             input_ids = torch.nn.utils.rnn.pad_sequence(
                 input_ids,
