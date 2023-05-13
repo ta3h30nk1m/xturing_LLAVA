@@ -183,15 +183,15 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
                 new_state_dict[key[6:]] = value
             model.load_state_dict(new_state_dict, strict=False)
         else:
-            import wget
-            url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
             output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-            print("download vicuna model")
-            wget.download(url, output_path)
-            print("done download vicuna model")
-            print("torch.load start")
+            if not os.path.exists(output_path):
+                import wget
+                url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
+                
+                print("download vicuna model")
+                wget.download(url, output_path)
+            print("torch.load")
             state_dict = torch.load(output_path, map_location='cpu')
-            print("torch.load end")
             model.load_state_dict(state_dict, strict=False)
             # weights_path = ModelHub().load("x/llama_lora_int4")
             # state_dict = torch.load(
