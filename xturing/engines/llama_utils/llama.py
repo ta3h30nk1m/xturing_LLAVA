@@ -973,7 +973,7 @@ class LlavaLlamaModel(LlamaModel):
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids)
 
-        vision_tower = getattr(self, 'vision_tower', None)
+        vision_tower = getattr(self, 'visual_model', None)
         if vision_tower is not None and (input_ids.shape[1] != 1 or self.training) and images is not None:
             # TODO: this is a modified multimodal LLM -- Haotian Liu
             #vision_tower = vision_tower[0]  # HACK: for FSDP
