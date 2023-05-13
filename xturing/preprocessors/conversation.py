@@ -237,7 +237,7 @@ conv_vicuna_v1_1 = Conversation(
     messages=(),
     offset=0,
     sep_style=SeparatorStyle.TWO,
-    sep=" ",
+    sep="###",
     sep2="</s>",
 )
 
