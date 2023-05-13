@@ -97,7 +97,7 @@ class InstructionDataCollator:
 
             rounds = conversation.split(conv.sep2)
             cur_len = 1
-            target[:cur_len] = -100
+            target[:cur_len] = IGNORE_INDEX
 
             for i, rou in enumerate(rounds):
                 if rou == "":
