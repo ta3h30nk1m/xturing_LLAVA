@@ -84,6 +84,6 @@ if __name__ == '__main__':
     parser.add_argument('--output', default="/app/output/")
     parser.add_argument('--bs', type=int, default=-1)
     parser.add_argument('--epochs', type=int, default=-1)
-    parser.add_argument('--lr', type=int, default=-1)
+    parser.add_argument('--lr', type=float, default=-1)
     args = parser.parse_args()
     main(args)
