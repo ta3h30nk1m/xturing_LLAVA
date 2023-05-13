@@ -89,7 +89,7 @@ class InstructionDataCollator:
             padding="longest",
             max_length=self.max_length,
             truncation=True
-        )
+        ).input_ids
         targets = input_ids.clone()
         sep = conv.sep + conv.roles[1] + ": "
         for conversation, target in zip(texts, targets):
