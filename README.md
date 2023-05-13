@@ -53,5 +53,6 @@ python simple_generate.py --weights_path ./checkpoint --image_file ./image.png -
 - RLHF
 - Make Command selecting Vision Tower (CLIP, DeepFloyd, ...)
 - Gradio WebUI(chat)
+- autoGPT (not GPT4 api but xturing-LLAVA)
 - Refactoring Codes
  
