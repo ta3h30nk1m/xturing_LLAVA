@@ -28,7 +28,7 @@ class TuringLightningModule(pl.LightningModule):
         optimizer_name: str = "adamw",
         saved_path: str = "saved_model",
     ):
-        super().__init__(accumulate_grad_batches=8)
+        super().__init__()
         self.model_engine = model_engine
         self.pytorch_model = self.model_engine.model#.mm_projector
         self.train_dataset = train_dataset
@@ -157,6 +157,7 @@ class LightningTrainer:
                 callbacks=training_callbacks,
                 enable_checkpointing=False,
                 log_every_n_steps=50,
+                accumulate_grad_batches=8
             )
         elif not use_lora and not use_deepspeed:
             self.trainer = Trainer(
@@ -166,6 +167,7 @@ class LightningTrainer:
                 callbacks=training_callbacks,
                 enable_checkpointing=True,
                 log_every_n_steps=50,
+                accumulate_grad_batches=8
             )
         else:
             training_callbacks = [
