@@ -96,7 +96,7 @@ class InstructionDataset(BaseDataset):
                     #text_ = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
                     #image_ = os.path.join(path, "images" , line['image'])  
                     image_ = os.path.join(output_img_folder, line['image'])
-                    instruction_ = line['conversation'][0]['value'] #'USER: ' + line['conversations'][0]['value'] + '\ASSISTANT: '
+                    instruction_ = line['conversations'][0]['value'] #'USER: ' + line['conversations'][0]['value'] + '\ASSISTANT: '
                     target_ = line['conversations'][1]['value']
                     
                     if os.path.isfile(image_) :
