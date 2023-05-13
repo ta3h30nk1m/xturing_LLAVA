@@ -85,20 +85,23 @@ class CausalEngine(BaseEngine):
                     images = batch["images"],
                     input_ids=batch["input_ids"],
                     attention_mask=batch.get("attention_mask", None),
+                    labels=batch.get("attention_mask", None)
                 )
         else:
             outputs = self.model(
                 images = batch["images"],
                 input_ids=batch["input_ids"],
                 attention_mask=batch.get("attention_mask", None),
+                labels=batch.get("attention_mask", None)
             )
 
-        if "label_mask" in batch:
-            loss = self.loss_fct(
-                outputs.get("logits"), batch["targets"], mask=batch["label_mask"]
-            )
-        else:
-            loss = self.loss_fct(outputs.get("logits"), batch["targets"])
+        # if "label_mask" in batch:
+        #     loss = self.loss_fct(
+        #         outputs.get("logits"), batch["targets"], mask=batch["label_mask"]
+        #     )
+        # else:
+        #     loss = self.loss_fct(outputs.get("logits"), batch["targets"])
+        loss = outputs.loss
 
         loss.requires_grad_(True)
         return loss

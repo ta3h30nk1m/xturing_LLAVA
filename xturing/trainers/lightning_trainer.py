@@ -28,7 +28,7 @@ class TuringLightningModule(pl.LightningModule):
         optimizer_name: str = "adamw",
         saved_path: str = "saved_model",
     ):
-        super().__init__()
+        super().__init__(accumulate_grad_batches=8)
         self.model_engine = model_engine
         self.pytorch_model = self.model_engine.model#.mm_projector
         self.train_dataset = train_dataset

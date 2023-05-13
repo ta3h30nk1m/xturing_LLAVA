@@ -88,10 +88,8 @@ def test(args):
     else:
         qs = qs + '\n' + DEFAULT_IMAGE_PATCH_TOKEN * image_token_len
 
-    if args.conv_mode == 'simple_legacy':
-        qs += '\n\n### Response:'
     # conv = default_conversation.copy()
-    conv = conv_templates[args.conv_mode].copy()
+    conv = conv_templates['vicuna_v1_1'].copy()
     conv.append_message(conv.roles[0], qs)
     prompt = conv.get_prompt()
     inputs = model.engine.tokenizer([prompt])
@@ -166,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument("--weights_path", type=str, default="")
     parser.add_argument("--image_file", type=str, default="")
     parser.add_argument("--text", type=str, default="")
-    parser.add_argument("--conv-mode", type=str, default="simple")
+    #parser.add_argument("--conv-mode", type=str, default="simple")
     args = parser.parse_args()
 
     test(args)

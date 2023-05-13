@@ -20,7 +20,13 @@ from xturing.self_instruct import (
 )
 from xturing.utils.utils import create_temp_directory, extract_text_from_directory
 
+from xturing.preprocessors.conversation import conv_templates
 
+IGNORE_INDEX = -100
+DEFAULT_IMAGE_TOKEN = "<image>"
+DEFAULT_IMAGE_PATCH_TOKEN = "<im_patch>"
+DEFAULT_IM_START_TOKEN = "<im_start>"
+DEFAULT_IM_END_TOKEN = "<im_end>"
 
 class ListPromptTemplate:
     def __init__(
@@ -95,14 +101,14 @@ class InstructionDataset(BaseDataset):
                 """
             try:
                 for line in chat_data:
-                    text_ = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
+                    #text_ = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
                     #image_ = os.path.join(path, "images" , line['image'])  
                     image_ = os.path.join(output_img_folder, line['image'])
-                    instruction_ = 'Human: ' + line['conversations'][0]['value'] + '\nAssistant: '
+                    instruction_ = line['conversation'][0]['value'] #'USER: ' + line['conversations'][0]['value'] + '\ASSISTANT: '
                     target_ = line['conversations'][1]['value']
                     
                     if os.path.isfile(image_) :
-                        self.data.append({'text': text_, 'image': image_, 'instruction': instruction_, 'target': target_})
+                        self.data.append({ 'image': image_, 'instruction': instruction_, 'target': target_})
                     else :
                         #print(f"{image_} is in chat.json but not in images folder.")
                         NumsOfImgsNotExist += 1
@@ -114,36 +120,36 @@ class InstructionDataset(BaseDataset):
             print(f"imgs detected : {len(self.data)},  imgs not exists : {NumsOfImgsNotExist}")
         #self._validate()
 
-        list_prompt_template = None
+        # list_prompt_template = None
 
-        if promt_template is not None:
-            list_prompt_template = ListPromptTemplate(
-                promt_template, input_variables=["text", "instruction"]
-            )
+        # if promt_template is not None:
+        #     list_prompt_template = ListPromptTemplate(
+        #         promt_template, input_variables=["text", "instruction"]
+        #     )
 
-        self._meta = InstructionDatasetMeta(
-            infix_instruction=infix_instruction,
-            list_prompt_template=list_prompt_template,
-        )
+        # self._meta = InstructionDatasetMeta(
+        #     infix_instruction=infix_instruction,
+        #     list_prompt_template=list_prompt_template,
+        # )
 
-    def _validate(self):
-        # check is hf dataset has train split and if it has column text, and if there are any other - it should be target
-        assert "train" in self.data, "The dataset should have a train split"
-        assert (
-            "text" in self.data["train"].column_names
-        ), "The dataset should have a column named text"
-        assert (
-            "target" in self.data["train"].column_names
-        ), "The dataset should have a column named target"
-        assert (
-            "instruction" in self.data["train"].column_names
-        ), "The dataset should have a column named instruction"
-        assert (
-            "image" in self.data["train"].column_names
-        ), "The dataset should have a column named image"
-        assert (
-            len(self.data["train"].column_names) == 4
-        ), "The dataset should have only three columns, instruction, text and target and image"
+    # def _validate(self):
+    #     # check is hf dataset has train split and if it has column text, and if there are any other - it should be target
+    #     assert "train" in self.data, "The dataset should have a train split"
+    #     assert (
+    #         "text" in self.data["train"].column_names
+    #     ), "The dataset should have a column named text"
+    #     assert (
+    #         "target" in self.data["train"].column_names
+    #     ), "The dataset should have a column named target"
+    #     assert (
+    #         "instruction" in self.data["train"].column_names
+    #     ), "The dataset should have a column named instruction"
+    #     assert (
+    #         "image" in self.data["train"].column_names
+    #     ), "The dataset should have a column named image"
+    #     assert (
+    #         len(self.data["train"].column_names) == 4
+    #     ), "The dataset should have only three columns, instruction, text and target and image"
 
     def __len__(self):
         return len(self.data)
@@ -152,7 +158,7 @@ class InstructionDataset(BaseDataset):
         return iter(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx]
-
+        return self.data[idx] 
+    
     #def save(self, path):
     #    return self.data.save_to_disk(path)

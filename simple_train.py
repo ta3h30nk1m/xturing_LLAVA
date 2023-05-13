@@ -42,14 +42,9 @@ def main(args):
         
     img_folder = output_img_folder                          # in kiml
     """
-    
-    
-    img_folder = os.path.join(args.dataset, "images")       # in colab or local
-    
-    instruction_dataset = InstructionDataset(dataset, img_folder)
-    print("datanum: ", len(instruction_dataset))
 
     # Initialize the model
+    print("init model")
     if args.weights_path == "":
         weights_path = None
         mm_projector_path = None
@@ -58,6 +53,11 @@ def main(args):
         mm_projector_path = os.path.join(weights_path, "mm_projector.bin")
     model = BaseModel.create("llama_lora_int4", weights_path=weights_path, pretrain_mm_mlp_adapter=mm_projector_path, first_stage=args.first_stage)
 
+    print("init dataset")
+    img_folder = os.path.join(args.dataset, "images")       # in colab or local
+    
+    instruction_dataset = InstructionDataset(dataset, img_folder)
+    print("datanum: ", len(instruction_dataset))
     # Finetune the model
     if args.weights_path != "":
         # load hyperparameters back from checkpoint
