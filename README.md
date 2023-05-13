@@ -36,6 +36,9 @@ python simple_train.py --dataset ./dataset_folder --weights_path ./checkpoint --
 - --weights_path: (optional) if pretrained weights exist. Otherwise, default LLaMA checkpoint is called
 - --first_stage: True for only train projector layer that connect visual encoder and LLM. False for train both projector and LLM
 - --output: specify checkpoint output path 
+- --lr: learning_rate
+- --bs: batch_size
+- --epochs: total epochs
 
   in order to change hyperparameters, go to ./xturing_LLAVA/config/finetuning_config.yaml and change config of 'llama_lora_int4'
 

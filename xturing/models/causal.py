@@ -25,7 +25,8 @@ from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 
 class CausalModel(BaseModel):
-    def __init__(self, engine: str, weights_path: Optional[str] = None, first_stage=True, pretrain_mm_mlp_adapter=None):
+    def __init__(self, engine: str, weights_path: Optional[str] = None, first_stage=True, pretrain_mm_mlp_adapter=None,
+                 epochs = None, batch_size = None, learning_rate = None):
         self.engine = BaseEngine.create(engine, weights_path, first_stage, pretrain_mm_mlp_adapter)
 
         self.model_name = engine.replace("_engine", "")
@@ -38,6 +39,12 @@ class CausalModel(BaseModel):
             / "finetuning_config.yaml",
             data_class=FinetuningConfig,
         )
+        if epochs is not None:
+            self.finetuning_args.num_train_epochs = epochs
+        if batch_size is not None:
+            self.finetuning_args.batch_size = batch_size
+        if learning_rate is not None:
+            self.finetuning_args.learning_rate = learning_rate
 
         # Generation config
         self.generation_args = load_config(
@@ -214,6 +221,8 @@ class CausalLoraModel(CausalModel):
 
 
 class CausalLoraInt8Model(CausalLoraModel):
-    def __init__(self, engine: str, weights_path: Optional[str] = None, first_stage=True, pretrain_mm_mlp_adapter=None):
+    def __init__(self, engine: str, weights_path: Optional[str] = None, first_stage=True, pretrain_mm_mlp_adapter=None,
+                 epochs=None, learning_rate=None, batch_size=None):
         assert_not_cpu_int8()
-        super().__init__(engine, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter)
+        super().__init__(engine, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter,
+                         epochs=epochs, learning_rate=learning_rate, batch_size=batch_size)

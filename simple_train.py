@@ -51,7 +51,18 @@ def main(args):
     else:
         weights_path = args.weights_path
         mm_projector_path = os.path.join(weights_path, "mm_projector.bin")
-    model = BaseModel.create("llama_lora_int4", weights_path=weights_path, pretrain_mm_mlp_adapter=mm_projector_path, first_stage=args.first_stage)
+    
+    lr = None
+    bs = None
+    epochs = None
+    if args.bs != -1:
+        bs = args.bs
+    if args.lr != -1:
+        lr = args.lr
+    if args.epochs != -1:
+        epochs = args.epochs
+    model = BaseModel.create("llama_lora_int4", weights_path=weights_path, pretrain_mm_mlp_adapter=mm_projector_path, first_stage=args.first_stage,
+                             epochs=epochs, batch_size=bs, learning_rate=lr)
 
     print("init dataset")
     img_folder = os.path.join(args.dataset, "images")       # in colab or local
@@ -71,5 +82,8 @@ if __name__ == '__main__':
     parser.add_argument('--weights_path', default="")
     parser.add_argument('--first_stage', type=bool, default=True)
     parser.add_argument('--output', default="/app/output/")
+    parser.add_argument('--bs', type=int, default=-1)
+    parser.add_argument('--epochs', type=int, default=-1)
+    parser.add_argument('--lr', type=int, default=-1)
     args = parser.parse_args()
     main(args)
