@@ -10,7 +10,7 @@ from torchvision import transforms
 
 from typing import Dict, Optional, Sequence
 
-from conversation import conv_templates
+from xturing.preprocessors.conversation import conv_templates
 
 IGNORE_INDEX = -100
 DEFAULT_IMAGE_TOKEN = "<image>"
