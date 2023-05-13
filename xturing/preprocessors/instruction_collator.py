@@ -95,10 +95,11 @@ class InstructionDataCollator:
         for conversation, target in zip(texts, targets):
             total_len = int(target.ne(self.tokenizer.pad_token_id).sum())
             print(total_len)
-
+            print(conversation)
+            print(target)
             rounds = conversation.split(conv.sep2)
-            cur_len = 1
-            target[:cur_len] = IGNORE_INDEX
+            cur_len = 0#1
+            # target[:cur_len] = IGNORE_INDEX
 
             for i, rou in enumerate(rounds):
                 if rou == "":
@@ -110,7 +111,7 @@ class InstructionDataCollator:
                 round_len = len(self.tokenizer(rou).input_ids)
                 
                 
-                instruction_len = len(self.tokenizer(parts[0]).input_ids) - 2
+                instruction_len = len(self.tokenizer(parts[0]).input_ids) - 1
                 
                 
 
