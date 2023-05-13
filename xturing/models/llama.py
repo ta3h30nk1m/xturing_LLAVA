@@ -66,5 +66,7 @@ class LlamaLoraInt4(CausalLoraInt8Model):
             output_dir = output_dir
         )
 
-    def __init__(self, weights_path: Optional[str] = None, first_stage = True, pretrain_mm_mlp_adapter=None):
-        super().__init__(LlamaLoraInt4Engine.config_name, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter)
+    def __init__(self, weights_path: Optional[str] = None, first_stage = True, pretrain_mm_mlp_adapter=None,
+                 epochs=None, learning_rate = None, batch_size = None):
+        super().__init__(LlamaLoraInt4Engine.config_name, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter,
+                         epochs=epochs, learning_rate=learning_rate, batch_size=batch_size)
