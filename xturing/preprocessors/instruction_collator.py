@@ -18,62 +18,9 @@ DEFAULT_IM_END_TOKEN = "<im_end>"
 
 image_token_len = 256  ## todo : Hard coded, fix later
 
-# def preprocess_multimodal(
-#     sources: Sequence[str],
-#     multimodal_cfg: dict,
-#     cur_token_len: int,
-# ) -> Dict:
-#     is_multimodal = multimodal_cfg['is_multimodal']
-#     # image_token_len = multimodal_cfg['image_token_len']
-#     image_token_len = cur_token_len
-#     if not is_multimodal:
-#         return sources
-
-#     for source in sources:
-#         if multimodal_cfg['sep_image_conv_front']:
-#             assert DEFAULT_IMAGE_TOKEN in source[0]['value']
-#             source[0]['value'] = source[0]['value'].replace(DEFAULT_IMAGE_TOKEN, '').strip()
-#             source[0]['value'] = DEFAULT_IMAGE_TOKEN + conversation_lib.default_conversation.sep + conversation_lib.default_conversation.roles[0] + ": " + source[0]['value']
-#         for sentence in source:
-#             replace_token = DEFAULT_IMAGE_PATCH_TOKEN * image_token_len
-#             if multimodal_cfg['use_im_start_end']:
-#                 replace_token = DEFAULT_IM_START_TOKEN + replace_token + DEFAULT_IM_END_TOKEN
-#             sentence["value"] = sentence["value"].replace(DEFAULT_IMAGE_TOKEN, replace_token)
-
-#     return sources
-
-# def preprocess(
-#     sources: Sequence[str],
-#     tokenizer: transformers.PreTrainedTokenizer,
-# ) -> Dict:
-#     """
-#     Given a list of sources, each is a conversation list. This transform:
-#     1. Add signal '### ' at the beginning each sentence, with end signal '\n';
-#     2. Concatenate conversations together;
-#     3. Tokenize the concatenated conversation;
-#     4. Make a deepcopy as the target. Mask human words with IGNORE_INDEX.
-#     """
-#     if conversation_lib.default_conversation.version == "v1":
-#         return preprocess_v1(sources, tokenizer)
-#     if conversation_lib.default_conversation.version == "mpt":
-#         return preprocess_mpt(sources, tokenizer)
-#     # add end signal and concatenate together
-#     conversations = []
-#     for source in sources:
-#         header = f"{conversation_lib.default_conversation.system}\n\n"
-#         conversation = _add_speaker_and_signal(header, source)
-#         conversations.append(conversation)
-#     # tokenize conversations
-#     conversations_tokenized = _tokenize_fn(conversations, tokenizer)
-#     input_ids = conversations_tokenized["input_ids"]
-#     targets = copy.deepcopy(input_ids)
-#     for target, source in zip(targets, sources):
-#         tokenized_lens = _tokenize_fn([header] + [s["value"] for s in source],
-#                                       tokenizer)["input_ids_lens"]
-#         speakers = [sentence["from"] for sentence in source]
-#         _mask_targets(target, tokenized_lens, speakers)
-
-#     return dict(input_ids=input_ids, labels=targets)
+# Reference : LLaVa preprocess codes
+# def preprocess_multimodal()
+# def preprocess()
 
 class InstructionDataCollator:
     config_name = "instruction_dataset"
@@ -118,14 +65,25 @@ class InstructionDataCollator:
         label_masks = []
 
         for sample in batches:
-            system_msg = sample["text"]
-            system_msg = system_msg + '\n' + DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_PATCH_TOKEN * image_token_len + DEFAULT_IM_END_TOKEN
-            input_text = self.tokenizer(system_msg)                         # system msg
-            input_img = self.transformer(Image.open(sample["image"]).convert('RGB'))   
-            input_target = self.tokenizer(sample["target"])                     
+            """
+            batch["text"] = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, 
+                                and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
+            batch["instruction"] = 'Human: ' + chatjsonline['conversations'][0]['value'] + '\nAssistant: '
+            batch["target"] = chatjsonline['conversations'][1]['value']
+            batch["image"] = os.path.join(output_img_folder, chatjsonline['image'])
             
+            chatjsonline['conversations'][0]['value'] = "Provide a brief description of the given image.\n<image>"
+            chatjsonline['conversations'][1]['value'] = "olive oil is a healthy ingredient used liberally ."
+            """
+            system_msg = sample["text"]            
+            input_text = self.tokenizer(system_msg)              
+            input_instruction = self.tokenizer(sample["instruction"].replace("<image>",  '\n' + DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_PATCH_TOKEN * image_token_len + DEFAULT_IM_END_TOKEN ))
+            input_target = self.tokenizer(sample["target"])  
+            input_img = self.transformer(Image.open(sample["image"]).convert('RGB')) 
             
-            #####  Now meta.list_prompt_template is None ###  Not Enter
+            print("input img info : ", type(input_img), input_img.shape)
+            
+            #####  Now meta.list_prompt_template is None #############  Not Enter, ignore #################################
             if self.meta.list_prompt_template is not None:
                 print("entered if 1")
                 combine = self.meta.list_prompt_template.build(
@@ -137,31 +95,35 @@ class InstructionDataCollator:
                 label_mask = [False] * len(input_combine["input_ids"]) + [True] * len(
                     input_target["input_ids"]
                 )
-            ##########################################################
+            ########################################################## Not Enter, ignore ###################################
             
-            ##### Now meta.infix_instruction is None , Enter Here #####
+            ##### Now meta.infix_instruction is None ################# <--------- Enter Here
             elif not self.meta.infix_instruction:
-                #print("entered elif 2")
-                input_instruction = self.tokenizer(sample["instruction"])
-#                 input_ids = (
-#                     input_instruction["input_ids"]
-#                     + input_text["input_ids"]
-#                     + input_target["input_ids"]
-#                 )
+
+###########       input_instruction = self.tokenizer(sample["instruction"])   --> moved to above of (if else) block. in order to replace <image> token
+
                 # fix here. Instruction dataset Variable Name is different between LLaVA and xturing
                 input_ids = (
                     input_text["input_ids"]
                     + input_instruction["input_ids"]
                     + input_target["input_ids"]
                 )
+                """
+                input_ids = (
+                    input_instruction["input_ids"]
+                    + input_text["input_ids"]
+                    + input_target["input_ids"]
+                )
+                """ 
                 label_mask = (
                     [False] * len(input_instruction["input_ids"])
                     + [False] * len(input_text["input_ids"])
                     + [True] * len(input_target["input_ids"])
                 )
-            ############################################################
+            ############################################################  --------> Enter finish
                 
-            else:  #####  Not Enter
+                
+            else:  #####################################################  Not Enter, ignore #################################
                 print("entered else 3")
                 parts = self._process_instruction(sample["instruction"])
 
@@ -186,8 +148,11 @@ class InstructionDataCollator:
                     + [True] * len(input_target["input_ids"])
                     + [False] * len(input_instructions[2]["input_ids"])
                 )
-            ################# end
+            ########################################################### Not Enter, ignore #################################
 
+            
+            
+            ################################################################ <--- Continue here
             input_ids = input_ids[: self.max_length - 1]
             input_ids.append(self.tokenizer.eos_token_id)
             attention_mask = [1] * len(input_ids)
