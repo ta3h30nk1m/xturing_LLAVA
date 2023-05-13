@@ -85,14 +85,14 @@ class CausalEngine(BaseEngine):
                     images = batch["images"],
                     input_ids=batch["input_ids"],
                     attention_mask=batch.get("attention_mask", None),
-                    labels=batch.get("attention_mask", None)
+                    labels=batch.get("labels", None)
                 )
         else:
             outputs = self.model(
                 images = batch["images"],
                 input_ids=batch["input_ids"],
                 attention_mask=batch.get("attention_mask", None),
-                labels=batch.get("attention_mask", None)
+                labels=batch.get("labels", None)
             )
 
         # if "label_mask" in batch:
