@@ -203,28 +203,16 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             print(f"torch.load({output_path}, strict = False), state_dict len = {len(state_dict.keys())}")
             model.load_state_dict(state_dict, strict=False)
 
-            
             model1_keys = set(state_dict.keys())
             model2_keys = set(model.state_dict().keys())
-
-            # Keys present in model1 but not in model2
             keys_only_in_model1 = model1_keys - model2_keys
-
-            # Keys present in model2 but not in model1
             keys_only_in_model2 = model2_keys - model1_keys
-
-            # Keys present in both models
             common_keys = model1_keys & model2_keys
             
-            print(f"state_dict keys only in {model_name} : {len(model1_keys)}")
-            print(keys_only_in_model1)
-            print(f"state_dict keys only in {output_path}: {len(model2_keys)}")
-            print(keys_only_in_model2)
+            print(f"state_dict keys only in {model_name} : {len(keys_only_in_model1)}")     # now LLaMa7BLoRA
+            print(f"state_dict keys only in {output_path}: {len(keys_only_in_model2)}")     # now Vicuna7BLoRA + vision model + mm_projector 
             print(f"state_dict keys commomly in {model_name}, {output_path}: {len(common_keys)}")
-            print(common_keys)
 
-
-            
             
             # weights_path = ModelHub().load("x/llama_lora_int4")
             # state_dict = torch.load(
@@ -236,7 +224,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             #     new_state_dict[key[6:]] = value
             # model.load_state_dict(new_state_dict, strict=False)
             
-        print(f"torch.load_state_dict(strict = False) finished, model.state_dict len : {len(model.state_dict().keys())}\n")    
+        print(f"torch.load_state_dict(strict = False) finished)
         
         if warmup_autotune:
             autotune_warmup(model)
