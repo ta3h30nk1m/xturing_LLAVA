@@ -87,3 +87,33 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=-1)
     args = parser.parse_args()
     main(args)
+"""
+For readers :
+    1. model = BaseModel.create("llama_lora_int4", weights_path=weights_path, pretrain_mm_mlp_adapter=mm_projector_path, first_stage=args.first_stage,
+                             epochs=epochs, batch_size=bs, learning_rate=lr)
+                class BaseModel(BaseParent):
+                        BaseModel.add_to_registry(LlamaLoraInt4.config_name, LlamaLoraInt4)
+                class LlamaLoraInt4(CausalLoraInt8Model):
+                    super().__init__(LlamaLoraInt4Engine.config_name, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter,
+                                         epochs=epochs, learning_rate=learning_rate, batch_size=batch_size)
+                class CausalLoraInt8Model(CausalLoraModel):
+                        assert_not_cpu_int8()
+                        super().__init__(engine, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter,
+                                         epochs=epochs, learning_rate=learning_rate, batch_size=batch_size)
+                class CausalLoraModel(CausalModel):
+                        super().__init__(engine, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter,
+                                         epochs=epochs, learning_rate=learning_rate, batch_size=batch_size)
+                class CausalModel(BaseModel):
+                        self.engine = BaseEngine.create(engine, weights_path, first_stage, pretrain_mm_mlp_adapter)
+                class BaseEngine(BaseParent):
+                        registry = {}
+                        quant_utiles/__init__.py
+                        BaseEngine.add_to_registry(LlamaLoraInt4Engine.config_name, LlamaLoraInt4Engine)
+                class LlamaLoraInt4Engine(CausalLoraEngine):
+                        config_name: str = "llama_lora_int4_engine"
+                        def __init__(self, weights_path: Optional[Union[str, Path]] = None, first_stage: bool = True, pretrain_mm_mlp_adapter:str = None):
+                                     model_name = "decapoda-research/llama-7b-hf"
+                Start read from here (LlamaLoraInt4Engine)
+    2. model.finetune(dataset=instruction_dataset, output_dir = args.output)
+"""
+###
