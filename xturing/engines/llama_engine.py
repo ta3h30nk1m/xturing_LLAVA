@@ -111,7 +111,7 @@ def find_layers(module, layers=[nn.Conv2d, nn.Linear], name=""):
     if type(module) in layers:
         return {name: module}
     res = {}
-    for name1, child in module.named_children():
+    for name1, child in module.named_children():        # named_modules로 한번에 가능함?
         res.update(
             find_layers(
                 child, layers=layers, name=name + "." + name1 if name != "" else name1
@@ -131,7 +131,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         # if weights_path is None:
         #     weights_path = ModelHub().load("x/llama_lora_int4")
         
-        print("LLamaConfig_from_pretrained start")
+        print("\nLLamaConfig_from_pretrained start")
         config = LlamaConfig.from_pretrained(model_name)
         print("LLamaConfig_from_pretrained end")
         
@@ -152,8 +152,12 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         torch.set_default_dtype(torch.half)
         transformers.modeling_utils._init_weights = False
         torch.set_default_dtype(torch.half)
+        
+        print(f"\nLoad {model_name} from huggingface...")
         model = LlamaForCausalLM(config)
         #model = Llava(config)#LlamaForCausalLM(config)#.from_pretrained("Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g") ### changed 
+        print(f"Load {model_name} from huggingface finished")
+        
         torch.set_default_dtype(torch.float)
         model = model.eval()
         layers = find_layers(model)
@@ -171,9 +175,12 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         wbits = 4
         groupsize = 128
         warmup_autotune = True
-
+        
+        print(f"\nQuantize models with make_quant()...")
         make_quant(model, layers, wbits, groupsize)
+        print(f"Quantize models with make_quant() finished")
         if weights_path is not None:
+            print(f"\nweights_path argument is not None, load {weight_path}/pytorch_model.bin ..")
             state_dict = torch.load(
                 weights_path / Path("pytorch_model.bin"), map_location="cpu"
             )
@@ -181,18 +188,25 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             for key, value in state_dict.items():
                 # print(key)
                 new_state_dict[key[6:]] = value
+            print("torch.load({weights_path}, strict = False), state_dict len = {len(state_dict)}, new_state_dict len = {len(new_state_dict)}")
             model.load_state_dict(new_state_dict, strict=False)
+            
         else:
+            print("\nweights_path argument is None, load Vicuna-7B-gptq-int4")
             output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
             if not os.path.exists(output_path):
+                print(f"you dont have {output_path} model weight. try wget vicuna model...")
                 import wget
                 url = "https://huggingface.co/Aitrepreneur/vicuna-7B-1.1-GPTQ-4bit-128g/resolve/main/vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
-                
-                print("download vicuna model")
                 wget.download(url, output_path)
-            print("torch.load")
+            
             state_dict = torch.load(output_path, map_location='cpu')
+            print("torch.load({output_path}, strict = False), state_dict len = {len(state_dict)}")
             model.load_state_dict(state_dict, strict=False)
+            
+
+            
+            
             # weights_path = ModelHub().load("x/llama_lora_int4")
             # state_dict = torch.load(
             #     weights_path / Path("pytorch_model.bin"), map_location="cpu"
@@ -202,8 +216,9 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             #     # print(key)
             #     new_state_dict[key[6:]] = value
             # model.load_state_dict(new_state_dict, strict=False)
-
-
+            
+        print(f"torch.load_state_dict(strict = False) finished, model.state_dict len : {len(model.state_dict())}\n")    
+        
         if warmup_autotune:
             autotune_warmup(model)
 
@@ -213,7 +228,8 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
 
         model.gradient_checkpointing_enable()
         model.enable_input_require_grads()
-
+        
+        print(f"Load Tokenizer of {model_name} from hugging face...")
         tokenizer = LlamaTokenizer.from_pretrained(model_name, add_bos_token=False)
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -239,19 +255,22 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
            
 
         if pretrain_mm_mlp_adapter is not None:
+            print(f"\nload mm_adapter weights from {pretrain_mm_mlp_adapter}...")
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
             self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
         
         else:
             output_path = "./mm_projector.bin"
             if not os.path.exists(output_path):
+                print(f"load mm_adapter weights from huggingface using wget...")
                 import wget
                 url = "https://huggingface.co/liuhaotian/LLaVA-7b-delta-v0/resolve/main/mm_projector.bin"
                 print("download mm_projector model")
                 wget.download(url, output_path)
             state_dict = torch.load(output_path, map_location='cpu')
             self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in state_dict.items()})
-
+        print("Load mm_projector weights finished.\n")
+        
         if(first_stage):
             print("performing first stage")
             self.model.requires_grad_(False)
