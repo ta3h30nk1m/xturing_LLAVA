@@ -30,7 +30,8 @@ We used the same datasets as [LLaVA](https://github.com/haotian-liu/LLaVA) which
 
 ## Training
 ```
-python simple_train.py --dataset ./dataset_folder --weights_path ./checkpoint --first_stage True --output --./output_path
+python simple_train.py --dataset ./dataset_folder --weights_path ./checkpoint --first_stage True --output --./output_path 
+                       --epochs 1 --bs 32 --lr 1e-3
 ```
 - --dataset: dataset folder path
 - --weights_path: (optional) if pretrained weights exist. Otherwise, default LLaMA checkpoint is called
