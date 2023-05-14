@@ -17,6 +17,13 @@ from xturing.engines.base import BaseEngine
 from xturing.preprocessors.base import BasePreprocessor
 
 
+GLOBAL_BATCHES = 32    # (will be Accumulate_grad_batches in argument of pytorch lightning trainer)
+# todo : this is hard coded, fix later
+# Global batch(accumulate grad batches) LLaVA settings
+#       first stage : bs = 128      (train mm_projector) (freeze CLIP, LLM, LLMLoRA)  
+#       second stage : bs = 32      (train mm_projector, LLMLoRA)  (freeze CLIP, LLM) 
+
+
 class TuringLightningModule(pl.LightningModule):
     def __init__(
         self,
@@ -149,7 +156,9 @@ class LightningTrainer:
         except AttributeError:
             pass
 
-        if DEFAULT_DEVICE.type == "cpu":
+        if DEFAULT_DEVICE.type == "cpu":   ############ not enter
+            print(f"\nPytorch Lightning Trainer Instance Generated  (You use decive cpu, r u serious?)")
+            print(f"Runtime log :  accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = False,   max_epochs = {max_epochs}\n")  ## todo : fix enable_checkpointing log, it is hard coded 
             self.trainer = Trainer(
                 num_nodes=1,
                 accelerator="cpu",
@@ -157,9 +166,11 @@ class LightningTrainer:
                 callbacks=training_callbacks,
                 enable_checkpointing=False,
                 log_every_n_steps=50,
-                accumulate_grad_batches=8
+                accumulate_grad_batches=GLOBAL_BATCHES
             )
-        elif not use_lora and not use_deepspeed:
+        elif not use_lora and not use_deepspeed: ######## first stage enter (?)
+            print(f"\nPytorch Lightning Trainer Instance Generated  (Should be First stage training)")
+            print(f"Runtime log :  accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = True,   max_epochs = {max_epochs}\n")   ## todo : fix enable_checkpointing log, it is hard coded 
             self.trainer = Trainer(
                 num_nodes=1,
                 accelerator="gpu",
@@ -167,9 +178,11 @@ class LightningTrainer:
                 callbacks=training_callbacks,
                 enable_checkpointing=True,
                 log_every_n_steps=50,
-                accumulate_grad_batches=8
+                accumulate_grad_batches=GLOBAL_BATCHES
             )
         else:
+            print(f"\nPytorch Lightning Trainer Instance Generated  (Should be Second stage training)")
+            print(f"Runtime log :  accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = True,   max_epochs = {max_epochs}\n") ## todo : fix enable_checkpointing log, it is hard coded 
             training_callbacks = [
                 callbacks.ModelCheckpoint(
                     #dirpath=str(checkpoints_dir_path), save_on_train_epoch_end=True
@@ -194,6 +207,7 @@ class LightningTrainer:
                 callbacks=training_callbacks,
                 enable_checkpointing=True,
                 log_every_n_steps=50,
+                accumulate_grad_batches=GLOBAL_BATCHES
             )
 
     def fit(self):
