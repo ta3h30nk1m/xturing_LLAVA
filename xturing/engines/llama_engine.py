@@ -224,7 +224,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             #     new_state_dict[key[6:]] = value
             # model.load_state_dict(new_state_dict, strict=False)
             
-        print(f"torch.load_state_dict(strict = False) finished)
+        print(f"torch.load_state_dict(strict = False) finished")
         
         if warmup_autotune:
             autotune_warmup(model)
