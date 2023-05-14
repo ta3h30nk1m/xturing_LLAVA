@@ -158,7 +158,7 @@ class LightningTrainer:
 
         if DEFAULT_DEVICE.type == "cpu":   ############ not enter
             print(f"\nPytorch Lightning Trainer Instance Generated  (You use decive cpu, r u serious?)")
-            print(f"Runtime log :  accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = False,   max_epochs = {max_epochs}\n")  ## todo : fix enable_checkpointing log, it is hard coded 
+            print(f"Runtime log :  use_lora = {use_lora},  use_deepspeed = {use_deepspeed},   accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = False,   max_epochs = {max_epochs}\n")  ## todo : fix enable_checkpointing log, it is hard coded 
             self.trainer = Trainer(
                 num_nodes=1,
                 accelerator="cpu",
@@ -170,7 +170,7 @@ class LightningTrainer:
             )
         elif not use_lora and not use_deepspeed: ######## first stage enter (?)
             print(f"\nPytorch Lightning Trainer Instance Generated  (Should be First stage training)")
-            print(f"Runtime log :  accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = True,   max_epochs = {max_epochs}\n")   ## todo : fix enable_checkpointing log, it is hard coded 
+            print(f"Runtime log :  use_lora = {use_lora},  use_deepspeed = {use_deepspeed},  accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = True,   max_epochs = {max_epochs}\n")   ## todo : fix enable_checkpointing log, it is hard coded 
             self.trainer = Trainer(
                 num_nodes=1,
                 accelerator="gpu",
@@ -180,9 +180,9 @@ class LightningTrainer:
                 log_every_n_steps=50,
                 accumulate_grad_batches=GLOBAL_BATCHES
             )
-        else:
+        else:                                    ######## second stage enter
             print(f"\nPytorch Lightning Trainer Instance Generated  (Should be Second stage training)")
-            print(f"Runtime log :  accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = True,   max_epochs = {max_epochs}\n") ## todo : fix enable_checkpointing log, it is hard coded 
+            print(f"Runtime log :  use_lora = {use_lora},  use_deepspeed = {use_deepspeed},   accumulate_grad_batches = {GLOBAL_BATCHES},   enable_checkpointing = True,   max_epochs = {max_epochs}\n") ## todo : fix enable_checkpointing log, it is hard coded 
             training_callbacks = [
                 callbacks.ModelCheckpoint(
                     #dirpath=str(checkpoints_dir_path), save_on_train_epoch_end=True
