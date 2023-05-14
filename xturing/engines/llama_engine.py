@@ -202,8 +202,9 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             
             state_dict = torch.load(output_path, map_location='cpu')
             print("torch.load({output_path}, strict = False), state_dict len = {len(state_dict)}")
+            print("vicuna state dict : {state_dict}")
             model.load_state_dict(state_dict, strict=False)
-            
+            print("model state dict : {model.state_dict()}")
 
             
             
