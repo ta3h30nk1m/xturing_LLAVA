@@ -188,11 +188,11 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             for key, value in state_dict.items():
                 # print(key)
                 new_state_dict[key[6:]] = value
-            print("torch.load({weights_path}, strict = False), state_dict len = {len(state_dict)}, new_state_dict len = {len(new_state_dict)}")
+            print(f"torch.load({weights_path}, strict = False), state_dict len = {len(state_dict)}, new_state_dict len = {len(new_state_dict)}")
             model.load_state_dict(new_state_dict, strict=False)
             
         else:
-            print("\nweights_path argument is None, load Vicuna-7B-gptq-int4")
+            print("\nweights_path argument is None, load Vicuna-7B-gptq-int4 using wget")
             output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
             if not os.path.exists(output_path):
                 print(f"you dont have {output_path} model weight. try wget vicuna model...")
@@ -201,10 +201,10 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
                 wget.download(url, output_path)
             
             state_dict = torch.load(output_path, map_location='cpu')
-            print("torch.load({output_path}, strict = False), state_dict len = {len(state_dict)}")
-            print("vicuna state dict : {state_dict}")
+            print(f"torch.load({output_path}, strict = False), state_dict len = {len(state_dict)}")
+            print(f"vicuna state dict : {state_dict}")
             model.load_state_dict(state_dict, strict=False)
-            print("model state dict : {model.state_dict()}")
+            print(f"model state dict : {model.state_dict()}")
 
             
             
