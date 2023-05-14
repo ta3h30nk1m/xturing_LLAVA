@@ -188,7 +188,6 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             for key, value in state_dict.items():
                 # print(key)
                 new_state_dict[key[6:]] = value
-            print(f"torch.load({weights_path}, strict = False), state_dict len = {len(state_dict.keys())}, new_state_dict len = {len(new_state_dict.keys())}")
             model.load_state_dict(new_state_dict, strict=False)
             
         else:
@@ -202,9 +201,28 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             
             state_dict = torch.load(output_path, map_location='cpu')
             print(f"torch.load({output_path}, strict = False), state_dict len = {len(state_dict.keys())}")
-            print(f"vicuna state dict : {state_dict.keys()}")
             model.load_state_dict(state_dict, strict=False)
-            print(f"model state dict : {model.state_dict().keys()}")
+
+            
+            model1_keys = set(state_dict.keys())
+            model2_keys = set(model.state_dict().keys())
+
+            # Keys present in model1 but not in model2
+            keys_only_in_model1 = model1_keys - model2_keys
+
+            # Keys present in model2 but not in model1
+            keys_only_in_model2 = model2_keys - model1_keys
+
+            # Keys present in both models
+            common_keys = model1_keys & model2_keys
+            
+            print(f"state_dict keys only in {model_name} : {len(model1_keys)}")
+            print(keys_only_in_model1)
+            print(f"state_dict keys only in {output_path}: {len(model2_keys)}")
+            print(keys_only_in_model2)
+            print(f"state_dict keys commomly in {model_name}, {output_path}: {len(common_keys)}")
+            print(common_keys)
+
 
             
             
