@@ -188,7 +188,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             for key, value in state_dict.items():
                 # print(key)
                 new_state_dict[key[6:]] = value
-            print(f"torch.load({weights_path}, strict = False), state_dict len = {len(state_dict)}, new_state_dict len = {len(new_state_dict)}")
+            print(f"torch.load({weights_path}, strict = False), state_dict len = {len(state_dict.keys())}, new_state_dict len = {len(new_state_dict.keys())}")
             model.load_state_dict(new_state_dict, strict=False)
             
         else:
@@ -201,10 +201,10 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
                 wget.download(url, output_path)
             
             state_dict = torch.load(output_path, map_location='cpu')
-            print(f"torch.load({output_path}, strict = False), state_dict len = {len(state_dict)}")
-            print(f"vicuna state dict : {state_dict}")
+            print(f"torch.load({output_path}, strict = False), state_dict len = {len(state_dict.keys())}")
+            print(f"vicuna state dict : {state_dict.keys()}")
             model.load_state_dict(state_dict, strict=False)
-            print(f"model state dict : {model.state_dict()}")
+            print(f"model state dict : {model.state_dict().keys()}")
 
             
             
@@ -218,7 +218,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             #     new_state_dict[key[6:]] = value
             # model.load_state_dict(new_state_dict, strict=False)
             
-        print(f"torch.load_state_dict(strict = False) finished, model.state_dict len : {len(model.state_dict())}\n")    
+        print(f"torch.load_state_dict(strict = False) finished, model.state_dict len : {len(model.state_dict().keys())}\n")    
         
         if warmup_autotune:
             autotune_warmup(model)
