@@ -27,8 +27,8 @@ from torchvision.transforms.functional import InterpolationMode
 class CausalModel(BaseModel):
     def __init__(self, engine: str, weights_path: Optional[str] = None, first_stage=True, pretrain_mm_mlp_adapter=None,
                  epochs = None, batch_size = None, learning_rate = None):
-        self.engine = BaseEngine.create(engine, weights_path, first_stage, pretrain_mm_mlp_adapter)
 
+        self.engine = BaseEngine.create(engine, weights_path, first_stage, pretrain_mm_mlp_adapter)
         self.model_name = engine.replace("_engine", "")
 
         # Finetuning config
@@ -58,6 +58,12 @@ class CausalModel(BaseModel):
         logger.debug(f"Finetuning parameters: {self.finetuning_args}")
         logger.debug(f"Generation parameters: {self.generation_args}")
 
+        print("\nRuntime Log : CausalModel __init__ begin")
+        print("\t engine(str) : {engine}, first_stage : {first_stage}, epoch : {epoch}, batch_size : {batch_size}, lr : {learning_rate}")
+        print("\t Finetuning config = {self.finetuning_args}")
+        print("\t Generation config = {self.generation_args}")
+        print("                CausalModel __init__ end\n")
+        
     def finetuning_config(self):
         return self.finetuning_args
 
