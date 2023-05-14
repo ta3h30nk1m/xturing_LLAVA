@@ -76,11 +76,21 @@ def main(args):
     model.finetune(dataset=instruction_dataset, output_dir = args.output)
     print("done")
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default="")
     parser.add_argument('--weights_path', default="")
-    parser.add_argument('--first_stage', type=bool, default=True)
+    parser.add_argument('--first_stage', type=str2bool, default=True)
     parser.add_argument('--output', default="/app/output/")
     parser.add_argument('--bs', type=int, default=-1)
     parser.add_argument('--epochs', type=int, default=-1)
