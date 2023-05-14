@@ -167,6 +167,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             for key in layers.keys():
                 if name in key:
                     key_to_del.append(key)
+        print(f"key_to_del = {key_to_del}")
         for key in key_to_del:
             del layers[key]
             # if name in layers:
