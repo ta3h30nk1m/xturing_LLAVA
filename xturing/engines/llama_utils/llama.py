@@ -999,7 +999,7 @@ class LlavaLlamaModel(LlamaModel):
                 image_features = [self.mm_projector(image_feature.to(torch.float16))[0] for image_feature in image_features]
             else:
                 image_features = image_features.to(torch.float16)
-                print(f"image_features : {image_features.dtype}   mm_projector : {self.mm_projector.weight.dtype}")
+                #print(f"image_features : {image_features.dtype}   mm_projector : {self.mm_projector.weight.dtype}") # image_features : torch.float16   mm_projector : torch.float32
                 image_features = self.mm_projector(image_features)
             dummy_image_features = torch.zeros(256, 1024, device=inputs_embeds.device, dtype=inputs_embeds.dtype)
             dummy_image_features = self.mm_projector(dummy_image_features)
