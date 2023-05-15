@@ -74,7 +74,7 @@ def main(args):
         # load hyperparameters back from checkpoint
         pass
 
-    print(model.engine.model.model.model.mm_projector.dtype)
+    print(":",model.engine.model.model.model.mm_projector.weight.dtype)
     model.finetune(dataset=instruction_dataset, output_dir = args.output)
     print("done")
 

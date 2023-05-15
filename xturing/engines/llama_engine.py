@@ -262,7 +262,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         #torch.set_default_dtype(torch.float) # when image_features = self.mm_projector(image_features): RuntimeError: expected scalar type Half but found Float. moved this line after loading mm_projecter
         #torch.set_default_dtype(torch.half)
            
-
+        print("Before load:", self.model.model.model.mm_projector.weight.dtype)
         if pretrain_mm_mlp_adapter is not None:
             print(f"\nload mm_adapter weights from {pretrain_mm_mlp_adapter}...")
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
@@ -279,7 +279,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             state_dict = torch.load(output_path, map_location='cpu')
             self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in state_dict.items()})
         print("Load mm_projector weights finished.\n")
-        
+        print("after load:", self.model.model.model.mm_projector.weight.dtype)
         
         if(first_stage):
             print("performing first stage")
