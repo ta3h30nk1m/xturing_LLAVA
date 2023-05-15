@@ -92,7 +92,7 @@ class InstructionDataset(BaseDataset):
                 ]
                 """
             try:
-                count = 0
+                #count = 0
                 for line in chat_data:
                     #text_ = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
                     #image_ = os.path.join(path, "images" , line['image'])  
@@ -105,8 +105,8 @@ class InstructionDataset(BaseDataset):
                     else :
                         #print(f"{image_} is in chat.json but not in images folder.")
                         NumsOfImgsNotExist += 1
-                    count+=1
-                    if(count>100): break
+                    #count+=1
+                    #if(count>100): break
             except KeyError:
                 raise ValueError(
                     "The json file should have keys text, instruction and target"
