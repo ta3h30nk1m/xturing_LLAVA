@@ -59,7 +59,7 @@ class CausalModel(BaseModel):
         logger.debug(f"Generation parameters: {self.generation_args}")
 
         print(f"\nRuntime Log : CausalModel __init__ begin")
-        print(f"\t engine(str) : {engine}, first_stage : {first_stage}, epoch : {epoch}, batch_size : {batch_size}, lr : {learning_rate}")
+        print(f"\t engine(str) : {engine}, first_stage : {first_stage}, epoch : {epochs}, batch_size : {batch_size}, lr : {learning_rate}")
         print(f"\t Finetuning config = {self.finetuning_args}")
         print(f"\t Generation config = {self.generation_args}")
         print(f"                CausalModel __init__ end\n")
