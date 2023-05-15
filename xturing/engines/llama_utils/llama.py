@@ -949,8 +949,9 @@ class LlavaLlamaModel(LlamaModel):
         self.visual_model.requires_grad_(False)
         # self.visual_model = self.visual_model.to(torch.float16)
         
-        print(f"\nInit mm_projector...")
+        
         self.mm_projector = torch.nn.Linear(1024, 4096).half()
+        print(f"\nInit mm_projector... dype = {self.mm_projector.weight.dtype}")
 
     def forward(
         self,
@@ -995,8 +996,7 @@ class LlavaLlamaModel(LlamaModel):
                     select_hidden_state = image_forward_outs.hidden_states[select_hidden_state_layer]
                     image_features = select_hidden_state[:, 1:]
             if type(images) is list:
-                image_features = image_features.to(torch.float16)
-                image_features = [self.mm_projector(image_features)[0] for image_feature in image_features]
+                image_features = [self.mm_projector(image_feature.to(torch.float16))[0] for image_feature in image_features]
             else:
                 image_features = image_features.to(torch.float16)
                 print(f"image_features : {image_features.dtype}   mm_projector : {self.mm_projector.weight.dtype}")
