@@ -79,7 +79,7 @@ class CausalEngine(BaseEngine):
         self.load_8bit = load_8bit
 
     def training_step(self, batch):
-        print("in training step: ",self.model.model.model.mm_projector.weight.dtype)
+        #print("in training step: ",self.model.model.model.mm_projector.weight.dtype) # in training step:  torch.float32
         if self.load_8bit:
             with torch.autocast("cuda", dtype=torch.float16):
                 outputs = self.model(
