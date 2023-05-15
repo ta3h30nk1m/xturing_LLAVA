@@ -71,7 +71,7 @@ class InstructionDataCollator:
 
         for sample in batches:
             input_img = self.transformer(Image.open(sample["image"]).convert('RGB'))   
-            images.append(input_img)
+            images.append(input_img.to(torch.float16))
 
             conv = conv_templates['vicuna_v1_1'].copy()
             instruction = sample["instruction"]
