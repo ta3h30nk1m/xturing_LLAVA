@@ -79,6 +79,7 @@ class CausalEngine(BaseEngine):
         self.load_8bit = load_8bit
 
     def training_step(self, batch):
+        print("in training step: ",self.model.model.model.mm_projector.dtype)
         if self.load_8bit:
             with torch.autocast("cuda", dtype=torch.float16):
                 outputs = self.model(
@@ -88,12 +89,13 @@ class CausalEngine(BaseEngine):
                     labels=batch.get("labels", None)
                 )
         else:
-            outputs = self.model(
-                images = batch["images"],
-                input_ids=batch["input_ids"],
-                attention_mask=batch.get("attention_mask", None),
-                labels=batch.get("labels", None)
-            )
+            with torch.autocast("cuda", dtype=torch.float16):
+                outputs = self.model(
+                    images = batch["images"],
+                    input_ids=batch["input_ids"],
+                    attention_mask=batch.get("attention_mask", None),
+                    labels=batch.get("labels", None)
+                )
 
         # if "label_mask" in batch:
         #     loss = self.loss_fct(

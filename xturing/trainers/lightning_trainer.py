@@ -209,8 +209,10 @@ class LightningTrainer:
                 log_every_n_steps=50,
                 accumulate_grad_batches=GLOBAL_BATCHES
             )
+        print("afer create trainer: ", self.lightning_model.pytorch_model.model.model.mm_projector.dtype)
 
     def fit(self):
+        print("inside fit: ",self.lightning_model.pytorch_model.model.model.mm_projector.dtype)
         self.trainer.fit(self.lightning_model)
         if self.trainer.checkpoint_callback is not None:
             self.trainer.checkpoint_callback.best_model_path

@@ -73,6 +73,8 @@ def main(args):
     if args.weights_path != "":
         # load hyperparameters back from checkpoint
         pass
+
+    print(model.engine.model.model.model.mm_projector.dtype)
     model.finetune(dataset=instruction_dataset, output_dir = args.output)
     print("done")
 
