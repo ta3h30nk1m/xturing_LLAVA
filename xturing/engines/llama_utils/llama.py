@@ -950,7 +950,7 @@ class LlavaLlamaModel(LlamaModel):
         # self.visual_model = self.visual_model.to(torch.float16)
         
         print(f"\nInit mm_projector...")
-        self.mm_projector = torch.nn.Linear(1024, 4096, dtype=torch.float16)
+        self.mm_projector = torch.nn.Linear(1024, 4096).half()
 
     def forward(
         self,

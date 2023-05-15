@@ -181,7 +181,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         make_quant(model, layers, wbits, groupsize)
         print(f"Quantize models with make_quant() finished")
         if weights_path is not None:
-            print(f"\nweights_path argument is not None, load {weight_path}/pytorch_model.bin ..")
+            print(f"\nweights_path argument is not None, load {weights_path}/pytorch_model.bin ..")
             state_dict = torch.load(
                 weights_path / Path("pytorch_model.bin"), map_location="cpu"
             )
