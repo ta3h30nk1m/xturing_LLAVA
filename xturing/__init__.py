@@ -2,7 +2,7 @@ from .utils.external_loggers import configure_external_loggers
 
 configure_external_loggers()
 
-from .datasets import BaseDataset, TextDataset, InstructionDataset
+from .datasets import BaseDataset, TextDataset, InstructionDataset, Llava_InstructionDataset
 from .engines import (
     BaseEngine,
     LLamaEngine,
