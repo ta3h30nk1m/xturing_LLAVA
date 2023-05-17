@@ -116,9 +116,9 @@ class Llava_InstructionDataCollator:
                 round_len = len(self.tokenizer(rou).input_ids)
                 instruction_len = len(self.tokenizer(parts[0]).input_ids) - 2
                 target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
-
-                cur_len += round_len+3
-            target[cur_len-3:] = IGNORE_INDEX
+                cur_len += round_len
+                target[cur_len : cur_len + 3] = IGNORE_INDEX
+                cur_len += 3
             #cur_len+=3
             if cur_len < self.tokenizer.model_max_length:
                 if cur_len != total_len:
@@ -127,6 +127,11 @@ class Llava_InstructionDataCollator:
                         f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
                         f" (ignored)"
                     )
+                    print(conversation)
+                    print(self.tokenizer(conversation).input_ids)
+                    print(target)
+                    import sys
+                    sys.exit()
             input_ids = torch.nn.utils.rnn.pad_sequence(
                 input_ids,
                 batch_first=True,
