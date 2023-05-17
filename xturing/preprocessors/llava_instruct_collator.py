@@ -2,6 +2,7 @@ from typing import Optional
 
 import torch
 import torch.nn.functional as F
+import transformers
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 
 from xturing.datasets import Llava_InstructionDatasetMeta
@@ -10,7 +11,8 @@ from torchvision import transforms
 
 from typing import Dict, Optional, Sequence
 
-from xturing.preprocessors.conversation import conv_templates
+import copy
+import xturing.preprocessors.conversation as conv_lib
 
 IGNORE_INDEX = -100
 DEFAULT_IMAGE_TOKEN = "<image>"
@@ -19,6 +21,64 @@ DEFAULT_IM_START_TOKEN = "<im_start>"
 DEFAULT_IM_END_TOKEN = "<im_end>"
 
 image_token_len = 256  ## todo : Hard coded, fix later
+
+def _tokenize_fn(strings: Sequence[str],
+                 tokenizer: transformers.PreTrainedTokenizer) -> Dict:
+    """Tokenize a list of strings."""
+    tokenized_list = [
+        tokenizer(
+            text,
+            return_tensors="pt",
+            padding="longest",
+            max_length=tokenizer.model_max_length,
+            truncation=True,
+        ) for text in strings
+    ]
+    input_ids = labels = [
+        tokenized.input_ids[0] for tokenized in tokenized_list
+    ]
+    input_ids_lens = labels_lens = [
+        tokenized.input_ids.ne(tokenizer.pad_token_id).sum().item()
+        for tokenized in tokenized_list
+    ]
+    return dict(
+        input_ids=input_ids,
+        labels=labels,
+        input_ids_lens=input_ids_lens,
+        labels_lens=labels_lens,
+    )
+
+
+def _mask_targets(target, tokenized_lens, speakers):
+    # cur_idx = 0
+    cur_idx = tokenized_lens[0]
+    tokenized_lens = tokenized_lens[1:]
+    target[:cur_idx] = IGNORE_INDEX
+    for tokenized_len, speaker in zip(tokenized_lens, speakers):
+        if speaker == "human":
+            target[cur_idx+2:cur_idx + tokenized_len] = IGNORE_INDEX
+        cur_idx += tokenized_len
+
+
+def _add_speaker_and_signal(header, source, get_conversation=True):
+    """Add speaker and start/end signal on each round."""
+    BEGIN_SIGNAL = "### "
+    END_SIGNAL = "\n"
+    conversation = header
+    for sentence in source:
+        from_str = sentence["from"]
+        if from_str.lower() == "human":
+            from_str = conv_lib.default_conversation.roles[0]
+        elif from_str.lower() == "gpt":
+            from_str = conv_lib.default_conversation.roles[1]
+        else:
+            from_str = 'unknown'
+        sentence["value"] = (BEGIN_SIGNAL + from_str + ": " +
+                             sentence["value"] + END_SIGNAL)
+        if get_conversation:
+            conversation += sentence["value"]
+    conversation += BEGIN_SIGNAL
+    return conversation
 
 class Llava_InstructionDataCollator:
     config_name = "llava_instruction_dataset"
@@ -68,66 +128,24 @@ class Llava_InstructionDataCollator:
     def __call__(self, batches):
         texts = []
         images = []
+        header = f"{conv_lib.default_conversation.system}\n\n"
 
         for sample in batches:
             input_img = self.transformer(Image.open(sample["image"]).convert('RGB'))   
             images.append(input_img.to(torch.float16))
-
-            conv = conv_templates['llava_v1'].copy()
-            replace_token = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_PATCH_TOKEN * image_token_len + DEFAULT_IM_END_TOKEN
-            # instruction = sample["instruction"]
-            conversations = sample["conversations"]
-            for i in range(len(conversations)):
-                if i % 2 == 0: # user
-                    instruction = conversations[i]['value']
-                    if DEFAULT_IMAGE_TOKEN in instruction:
-                        instruction = instruction.replace(DEFAULT_IMAGE_TOKEN, replace_token)
-                    conv.append_message(conv.roles[0], instruction)
-                else: # gpt
-                    target = conversations[i]['value']
-                    conv.append_message(conv.roles[1], target)
-            
-            input_text = conv.get_prompt()
-
-            texts.append(input_text)
-
-        input_ids = self.tokenizer(
-            texts,
-            return_tensors="pt",
-            padding="longest",
-            max_length=self.max_length,
-            truncation=True
-        ).input_ids
-        targets = input_ids.clone()
-        sep = conv.sep + conv.roles[1] + ": "
-        sep2_len = len(self.tokenizer(conv.sep2).input_ids)
-        for conversation, target in zip(texts, targets):
-            total_len = int(target.ne(self.tokenizer.pad_token_id).sum())
-            rounds = conversation.split(conv.sep2)
-            cur_len = 0
-            #target[:cur_len] = IGNORE_INDEX
-
-            for i, rou in enumerate(rounds):
-                if rou == "":
-                    break
-                parts = rou.split(sep)
-                if len(parts) != 2:
-                    break
-                parts[0] += sep
-                round_len = len(self.tokenizer(rou).input_ids)
-                instruction_len = len(self.tokenizer(parts[0]).input_ids) - 1
-                target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
-                cur_len += round_len
-                target[cur_len : cur_len + sep2_len] = IGNORE_INDEX
-                cur_len += sep2_len
-            #cur_len+=3
-            if cur_len < self.tokenizer.model_max_length:
-                if cur_len != total_len:
-                    target[:] = IGNORE_INDEX
-                    print(
-                        f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
-                        f" (ignored)"
-                    )
+            source = sample["conversations"]
+            conversation = _add_speaker_and_signal(header, source)
+            texts.append(conversation)
+        # tokenize conversations
+        conversations_tokenized = _tokenize_fn(texts, self.tokenizer)
+        input_ids = conversations_tokenized["input_ids"]
+        targets = copy.deepcopy(input_ids)
+        for target, sample in zip(targets, batches):
+            source = sample["conversations"]
+            tokenized_lens = _tokenize_fn([header] + [s["value"] for s in source],
+                                        self.tokenizer)["input_ids_lens"]
+            speakers = [sentence["from"] for sentence in source]
+            _mask_targets(target, tokenized_lens, speakers)
             
             input_ids = torch.nn.utils.rnn.pad_sequence(
                 input_ids,
