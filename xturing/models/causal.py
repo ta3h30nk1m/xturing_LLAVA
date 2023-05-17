@@ -10,6 +10,7 @@ from xturing.config import DEFAULT_DEVICE, assert_not_cpu_int8
 from xturing.config.config_data_classes import FinetuningConfig, GenerationConfig
 from xturing.config.read_config import load_config
 from xturing.datasets.instruction_dataset import InstructionDataset
+from xturing.datasets.llava_instruct_dataset import Llava_InstructionDataset
 from xturing.datasets.text_dataset import TextDataset
 from xturing.engines.base import BaseEngine
 from xturing.engines.causal import CausalLoraEngine
@@ -70,7 +71,7 @@ class CausalModel(BaseModel):
     def generation_config(self):
         return self.generation_args
 
-    def _make_collate_fn(self, dataset: Union[TextDataset, InstructionDataset]):
+    def _make_collate_fn(self, dataset: Union[TextDataset, InstructionDataset, Llava_InstructionDataset]):
         normalize = transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
         transform_train = transforms.Compose([                        
                 transforms.RandomResizedCrop(224,scale=(0.5, 1.0),interpolation=InterpolationMode.BICUBIC),
@@ -86,7 +87,7 @@ class CausalModel(BaseModel):
             transform_train
         )
 
-    def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset]):
+    def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset, Llava_InstructionDataset]):
         return BaseTrainer.create(
             LightningTrainer.config_name,
             self.engine,
@@ -98,15 +99,15 @@ class CausalModel(BaseModel):
             self.finetuning_args.optimizer_name,
         )
 
-    def finetune(self, dataset: Union[TextDataset, InstructionDataset], output_dir):
-        assert dataset.config_name in [
-            "text_dataset",
-            "instruction_dataset",
-        ], "Please make sure the dataset_type is text_dataset or instruction_dataset"
+    def finetune(self, dataset: Union[TextDataset, InstructionDataset, Llava_InstructionDataset], output_dir):
+        # assert dataset.config_name in [
+        #     "text_dataset",
+        #     "instruction_dataset",
+        # ], "Please make sure the dataset_type is text_dataset or instruction_dataset"
         trainer = self._make_trainer(dataset, output_dir = output_dir)
         trainer.fit()
 
-    def evaluate(self, dataset: Union[TextDataset, InstructionDataset]):
+    def evaluate(self, dataset: Union[TextDataset, InstructionDataset, Llava_InstructionDataset]):
         pass
 
     def _generate_from_iterable(
@@ -143,7 +144,7 @@ class CausalModel(BaseModel):
         self,
         *,
         texts: Optional[Union[List[str], str]] = None,
-        dataset: Optional[Union[TextDataset, InstructionDataset]] = None,
+        dataset: Optional[Union[TextDataset, InstructionDataset, Llava_InstructionDataset]] = None,
     ):
         self.engine.model.eval()
         self.engine.model = self.engine.model.to(DEFAULT_DEVICE)
@@ -213,7 +214,7 @@ class CausalLoraModel(CausalModel):
         super().__init__(engine, weights_path, first_stage=first_stage, pretrain_mm_mlp_adapter=pretrain_mm_mlp_adapter,
                          epochs=epochs, learning_rate=learning_rate, batch_size=batch_size)
 
-    def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset]):
+    def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset, Llava_InstructionDataset]):
         return BaseTrainer.create(
             LightningTrainer.config_name,
             self.engine,

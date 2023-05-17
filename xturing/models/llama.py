@@ -15,6 +15,7 @@ from xturing.models.causal import (
 )
 from xturing.trainers.base import BaseTrainer
 from xturing.datasets.instruction_dataset import InstructionDataset
+from xturing.datasets.llava_instruct_dataset import Llava_InstructionDataset
 from xturing.datasets.text_dataset import TextDataset
 from xturing.trainers.lightning_trainer import LightningTrainer
 
@@ -50,7 +51,7 @@ class LlamaLoraInt8(CausalLoraInt8Model):
 class LlamaLoraInt4(CausalLoraInt8Model):
     config_name: str = "llama_lora_int4"
 
-    def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset], output_dir):
+    def _make_trainer(self, dataset: Union[TextDataset, InstructionDataset, Llava_InstructionDataset], output_dir):
         return BaseTrainer.create(
             LightningTrainer.config_name,
             self.engine,
