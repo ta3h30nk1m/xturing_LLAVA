@@ -77,10 +77,11 @@ class Llava_InstructionDataCollator:
             replace_token = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_PATCH_TOKEN * image_token_len + DEFAULT_IM_END_TOKEN
             # instruction = sample["instruction"]
             conversations = sample["conversations"]
-            for i in range(conversations):
+            for i in range(len(conversations)):
                 if i % 2 == 0: # user
                     instruction = conversations[i]['value']
-                    instruction = instruction.replace(DEFAULT_IMAGE_TOKEN, replace_token)
+                    if DEFAULT_IMAGE_TOKEN in instruction:
+                        instruction = instruction.replace(DEFAULT_IMAGE_TOKEN, replace_token)
                     conv.append_message(conv.roles[0], instruction)
                 else: # gpt
                     target = conversations[i]['value']
