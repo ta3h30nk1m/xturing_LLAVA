@@ -103,8 +103,8 @@ class Llava_InstructionDataCollator:
         for conversation, target in zip(texts, targets):
             total_len = int(target.ne(self.tokenizer.pad_token_id).sum())
             rounds = conversation.split(conv.sep2)
-            cur_len = 0#1
-            # target[:cur_len] = IGNORE_INDEX
+            cur_len = 1
+            target[:cur_len] = IGNORE_INDEX
 
             for i, rou in enumerate(rounds):
                 if rou == "":
@@ -114,7 +114,7 @@ class Llava_InstructionDataCollator:
                     break
                 parts[0] += sep
                 round_len = len(self.tokenizer(rou).input_ids)
-                instruction_len = len(self.tokenizer(parts[0]).input_ids) - 1
+                instruction_len = len(self.tokenizer(parts[0]).input_ids) - 2
                 target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
 
                 cur_len += round_len+3
