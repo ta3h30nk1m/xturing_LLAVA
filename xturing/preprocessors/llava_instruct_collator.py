@@ -122,7 +122,6 @@ class Llava_InstructionDataCollator:
             #cur_len+=3
             if cur_len < self.tokenizer.model_max_length:
                 if cur_len != total_len:
-                    target[:] = IGNORE_INDEX
                     print(
                         f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
                         f" (ignored)"
@@ -130,6 +129,7 @@ class Llava_InstructionDataCollator:
                     print(conversation)
                     print(self.tokenizer(conversation).input_ids)
                     print(target)
+                    target[:] = IGNORE_INDEX
                     import sys
                     sys.exit()
             input_ids = torch.nn.utils.rnn.pad_sequence(
