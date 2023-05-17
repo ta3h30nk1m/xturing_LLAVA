@@ -100,11 +100,12 @@ class Llava_InstructionDataCollator:
         ).input_ids
         targets = input_ids.clone()
         sep = conv.sep + conv.roles[1] + ": "
+        sep2_len = len(self.tokenizer(conv.sep2).input_ids)
         for conversation, target in zip(texts, targets):
             total_len = int(target.ne(self.tokenizer.pad_token_id).sum())
             rounds = conversation.split(conv.sep2)
-            cur_len = 1
-            target[:cur_len] = IGNORE_INDEX
+            cur_len = 0
+            #target[:cur_len] = IGNORE_INDEX
 
             for i, rou in enumerate(rounds):
                 if rou == "":
@@ -114,24 +115,20 @@ class Llava_InstructionDataCollator:
                     break
                 parts[0] += sep
                 round_len = len(self.tokenizer(rou).input_ids)
-                instruction_len = len(self.tokenizer(parts[0]).input_ids) - 2
+                instruction_len = len(self.tokenizer(parts[0]).input_ids) - 1
                 target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
                 cur_len += round_len
-                target[cur_len : cur_len + 3] = IGNORE_INDEX
-                cur_len += 3
+                target[cur_len : cur_len + sep2_len] = IGNORE_INDEX
+                cur_len += sep2_len
             #cur_len+=3
             if cur_len < self.tokenizer.model_max_length:
                 if cur_len != total_len:
+                    target[:] = IGNORE_INDEX
                     print(
                         f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
                         f" (ignored)"
                     )
-                    print(conversation)
-                    print(self.tokenizer(conversation).input_ids)
-                    print(target)
-                    target[:] = IGNORE_INDEX
-                    import sys
-                    sys.exit()
+            
             input_ids = torch.nn.utils.rnn.pad_sequence(
                 input_ids,
                 batch_first=True,
