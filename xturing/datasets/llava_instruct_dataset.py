@@ -69,7 +69,7 @@ class Llava_InstructionDataset(BaseDataset):
             self.data = []
             NumsOfImgsNotExist = 0
 
-            with open(os.path.join(path, "chat.json"), "r") as f:
+            with open(os.path.join(path, "llava_instruct_80k.json"), "r") as f:
                 chat_data = json.load(f)
                 """
                 [
@@ -96,12 +96,11 @@ class Llava_InstructionDataset(BaseDataset):
                 for line in chat_data:
                     #text_ = 'You are GPT0, a large language and vision assistant.\nYou are able to understand the visual content that the user provides, and assist the user with a variety of tasks using natural language.\nFollow the instructions carefully and explain your answers in detail.\n'
                     #image_ = os.path.join(path, "images" , line['image'])  
-                    image_ = os.path.join(output_img_folder, line['image'])
-                    instruction_ = line['conversations'][0]['value'] #'USER: ' + line['conversations'][0]['value'] + '\ASSISTANT: '
-                    target_ = line['conversations'][1]['value']
+                    image_ = os.path.join(output_img_folder, 'train2014', 'COCO_train2014_' + line['image'])
+                    conversations_ = line['conversations']
                     
                     if os.path.isfile(image_) :
-                        self.data.append({ 'image': image_, 'instruction': instruction_, 'target': target_})
+                        self.data.append({ 'image': image_, 'conversations': conversations_ })
                     else :
                         #print(f"{image_} is in chat.json but not in images folder.")
                         NumsOfImgsNotExist += 1

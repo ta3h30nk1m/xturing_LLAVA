@@ -73,12 +73,19 @@ class Llava_InstructionDataCollator:
             input_img = self.transformer(Image.open(sample["image"]).convert('RGB'))   
             images.append(input_img.to(torch.float16))
 
-            conv = conv_templates['simple_conv_multimodal'].copy()
-            instruction = sample["instruction"]
+            conv = conv_templates['llava_v1'].copy()
             replace_token = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_PATCH_TOKEN * image_token_len + DEFAULT_IM_END_TOKEN
-            instruction = instruction.replace(DEFAULT_IMAGE_TOKEN, replace_token)
-            conv.append_message(conv.roles[0], instruction)
-            conv.append_message(conv.roles[1], sample["target"])
+            # instruction = sample["instruction"]
+            conversations = sample["conversations"]
+            for i in range(conversations):
+                if i % 2 == 0: # user
+                    instruction = conversations[i]['value']
+                    instruction = instruction.replace(DEFAULT_IMAGE_TOKEN, replace_token)
+                    conv.append_message(conv.roles[0], instruction)
+                else: # gpt
+                    target = conversations[i]['value']
+                    conv.append_message(conv.roles[1], target)
+            
             input_text = conv.get_prompt()
 
             texts.append(input_text)
@@ -109,9 +116,9 @@ class Llava_InstructionDataCollator:
                 instruction_len = len(self.tokenizer(parts[0]).input_ids) - 1
                 target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
 
-                cur_len += round_len
-            target[cur_len:] = IGNORE_INDEX
-            cur_len+=3
+                cur_len += round_len+3
+            target[cur_len-3:] = IGNORE_INDEX
+            #cur_len+=3
             if cur_len < self.tokenizer.model_max_length:
                 if cur_len != total_len:
                     target[:] = IGNORE_INDEX

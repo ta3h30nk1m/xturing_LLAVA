@@ -6,7 +6,7 @@ from math import floor
 import os
 import zipfile
 
-from xturing.datasets import InstructionDataset
+from xturing.datasets import InstructionDataset, Llava_InstructionDataset
 from xturing.models import BaseModel
 
 def main(args):
@@ -67,7 +67,7 @@ def main(args):
     print("init dataset")
     img_folder = os.path.join(args.dataset, "images")       # in colab or local
     
-    instruction_dataset = InstructionDataset(dataset, img_folder)
+    instruction_dataset = Llava_InstructionDataset(dataset, img_folder)
     print("datanum: ", len(instruction_dataset))
     # Finetune the model
     if args.weights_path != "":
