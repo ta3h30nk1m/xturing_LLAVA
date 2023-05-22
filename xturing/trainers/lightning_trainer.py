@@ -100,6 +100,8 @@ class TuringLightningModule(pl.LightningModule):
 
     def on_save_checkpoint(self, checkpoint):
         self.model_engine.save(self.saved_path)
+        path = os.path.join(self.saved_path, 'optimizer.pkl')
+        torch.save(self.optimizers()[0].state_dict(), path)
 
 
 class LightningTrainer:
