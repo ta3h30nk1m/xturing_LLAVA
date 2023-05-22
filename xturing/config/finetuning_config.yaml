@@ -18,5 +18,5 @@ llama_lora_int4:
   learning_rate: 1e-4
   weight_decay: 0.01
   num_train_epochs: 1
-  batch_size: 4
-  max_length: 1024
+  batch_size: 6
+  max_length: 800
