@@ -146,7 +146,7 @@ class Llava_InstructionDataset(BaseDataset):
     #     ), "The dataset should have only three columns, instruction, text and target and image"
 
     def __len__(self):
-        return len(self.data)
+        return 5000 # len(self.data)
 
     def __iter__(self):
         return iter(self.data)
