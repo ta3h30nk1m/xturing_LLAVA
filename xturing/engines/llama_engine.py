@@ -180,18 +180,8 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         print(f"\nQuantize models with make_quant()...")
         make_quant(model, layers, wbits, groupsize)
         print(f"Quantize models with make_quant() finished")
-        if weights_path is not None:
-            print(f"\nweights_path argument is not None, load {weights_path}/pytorch_model.bin ..")
-            state_dict = torch.load(
-                weights_path / Path("pytorch_model.bin"), map_location="cpu"
-            )
-            new_state_dict = {}
-            for key, value in state_dict.items():
-                # print(key)
-                new_state_dict[key[6:]] = value
-            model.load_state_dict(new_state_dict, strict=False)
             
-        else:
+        if weights_path is None:
             print("\nweights_path argument is None, load Vicuna-7B-gptq-int4 using wget")
             output_path = "./vicuna-7B-1.1-GPTQ-4bit-128g.no-act-order.pt"
             if not os.path.exists(output_path):
@@ -261,12 +251,23 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
         # only training mm_projector
         #torch.set_default_dtype(torch.float) # when image_features = self.mm_projector(image_features): RuntimeError: expected scalar type Half but found Float. moved this line after loading mm_projecter
         #torch.set_default_dtype(torch.half)
+
+        if weights_path is not None:
+            print(f"\nweights_path argument is not None, load {weights_path}/pytorch_model.bin ..")
+            state_dict = torch.load(
+                weights_path / Path("pytorch_model.bin"), map_location="cpu"
+            )
+            new_state_dict = {}
+            for key, value in state_dict.items():
+                # print(key)
+                new_state_dict[key[6:]] = value
+            model.load_state_dict(new_state_dict, strict=False)
            
-        print("Before load:", self.model.model.model.mm_projector.weight.dtype)
-        if pretrain_mm_mlp_adapter is not None:
-            print(f"\nload mm_adapter weights from {pretrain_mm_mlp_adapter}...")
-            mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
-            self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
+        # print("Before load:", self.model.model.model.mm_projector.weight.dtype)
+        # if pretrain_mm_mlp_adapter is not None:
+        #     print(f"\nload mm_adapter weights from {pretrain_mm_mlp_adapter}...")
+        #     mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
+        #     self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items()})
         
         else:
             output_path = "./mm_projector.bin"
@@ -279,7 +280,7 @@ class LlamaLoraInt4Engine(CausalLoraEngine):
             state_dict = torch.load(output_path, map_location='cpu')
             self.model.model.model.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in state_dict.items()})
         print("Load mm_projector weights finished.\n")
-        print("after load:", self.model.model.model.mm_projector.weight.dtype)
+        # print("after load:", self.model.model.model.mm_projector.weight.dtype)
         
         if(first_stage):
             print("performing first stage")
